@@ -4,6 +4,8 @@ import SwiftUI
 struct MessageRow: View {
     let message: ChatMessage
     let onVocabTap: (VocabItem) -> Void
+    /// Called with the text starting at a tapped word, for dictionary lookup.
+    let onWordTap: (String) -> Void
 
     var body: some View {
         switch message.sender {
@@ -20,7 +22,7 @@ struct MessageRow: View {
                     .font(.caption)
                     .foregroundStyle(Theme.metaText)
                 HStack(alignment: .bottom, spacing: 4) {
-                    Bubble(text: message.text, sender: .bot)
+                    Bubble(text: message.text, sender: .bot, onWordTap: onWordTap)
                     TimeLabel(date: message.date)
                 }
                 if !message.vocab.isEmpty {
@@ -43,7 +45,7 @@ struct MessageRow: View {
                 }
                 .font(.caption2)
                 .foregroundStyle(Theme.metaText)
-                Bubble(text: message.text, sender: .user)
+                Bubble(text: message.text, sender: .user, onWordTap: onWordTap)
             }
             if !message.corrections.isEmpty {
                 CorrectionsView(corrections: message.corrections)
@@ -56,11 +58,25 @@ struct MessageRow: View {
 private struct Bubble: View {
     let text: String
     let sender: Sender
+    let onWordTap: (String) -> Void
+
+    private var textColor: Color {
+        sender == .user ? Theme.userBubbleText : .primary
+    }
 
     var body: some View {
-        Text(text)
+        // Every Japanese word is a link; tinting links with the text color keeps
+        // the bubble looking like plain text.
+        Text(TappableText.attributed(text))
             .font(.body)
-            .foregroundStyle(sender == .user ? Theme.userBubbleText : .primary)
+            .foregroundStyle(textColor)
+            .tint(textColor)
+            .environment(\.openURL, OpenURLAction { url in
+                if let lookup = TappableText.lookupText(in: text, for: url) {
+                    onWordTap(lookup)
+                }
+                return .handled
+            })
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(

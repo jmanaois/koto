@@ -4,6 +4,7 @@ import SwiftUI
 struct ChatView: View {
     @Bindable var model: ChatViewModel
     @State private var selectedVocab: VocabItem?
+    @State private var wordLookup: WordLookup?
 
     /// Sample sentences so the fake bot's corrections can be tried without a Japanese keyboard.
     private let samples = [
@@ -23,8 +24,12 @@ struct ChatView: View {
                             if index == 0 || !Calendar.current.isDate(message.date, inSameDayAs: model.messages[index - 1].date) {
                                 DatePill(date: message.date)
                             }
-                            MessageRow(message: message) { selectedVocab = $0 }
-                                .id(message.id)
+                            MessageRow(
+                                message: message,
+                                onVocabTap: { selectedVocab = $0 },
+                                onWordTap: { wordLookup = WordLookup(text: $0) }
+                            )
+                            .id(message.id)
                         }
 
                         if model.isBotTyping {
@@ -69,6 +74,10 @@ struct ChatView: View {
             .sheet(item: $selectedVocab) { item in
                 VocabDetailSheet(item: item)
                     .presentationDetents([.height(260)])
+            }
+            .sheet(item: $wordLookup) { lookup in
+                WordLookupSheet(lookup: lookup)
+                    .presentationDetents([.medium, .large])
             }
         }
     }
