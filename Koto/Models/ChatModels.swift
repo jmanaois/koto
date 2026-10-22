@@ -9,6 +9,8 @@ nonisolated struct ChatMessage: Identifiable, Equatable {
     var id = UUID()
     let sender: Sender
     let text: String
+    /// Which group-chat member wrote this (bot) message; nil outside group chats.
+    var speaker: String?
     var date = Date()
     /// Corrections the bot made to this (user) message.
     var corrections: [Correction] = []

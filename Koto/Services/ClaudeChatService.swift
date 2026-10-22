@@ -17,6 +17,7 @@ struct ClaudeChatService: ChatService {
         case truncated
         case unreadableResponse
         case emptyTranslation
+        case emptyReply
 
         var errorDescription: String? {
             switch self {
@@ -32,12 +33,20 @@ struct ClaudeChatService: ChatService {
                 "Couldn't read the reply from the API."
             case .emptyTranslation:
                 "The translation came back empty. Try again."
+            case .emptyReply:
+                "The reply came back empty. Try sending again."
             }
         }
     }
 
-    func reply(to history: [ChatMessage], practiceWords: [VocabItem]) async throws -> BotResponse {
-        try await send(Self.body(history: history, practiceWords: practiceWords))
+    func reply(to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode) async throws -> BotResponse {
+        // Like translations, the model now and then sends "reply": "". Ask once more before giving up.
+        let body = Self.body(history: history, practiceWords: practiceWords, mode: mode)
+        for _ in 0..<2 {
+            let response: BotResponse = try await send(body)
+            if !response.reply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return response }
+        }
+        throw ServiceError.emptyReply
     }
 
     func explain(_ text: String, context: [ChatMessage]) async throws -> MessageExplanation {
@@ -97,7 +106,7 @@ struct ClaudeChatService: ChatService {
 
     // MARK: - Request
 
-    private static func body(history: [ChatMessage], practiceWords: [VocabItem]) -> [String: Any] {
+    private static func body(history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode) -> [String: Any] {
         var messages = apiMessages(from: history)
         if !practiceWords.isEmpty, var last = messages.last, last["role"] as? String == "user" {
             // Practice words ride along with the newest user turn only, so earlier turns
@@ -111,7 +120,7 @@ struct ClaudeChatService: ChatService {
         return [
             "model": model,
             "max_tokens": 4000,
-            "system": [["type": "text", "text": KotoPrompt.system]],
+            "system": [["type": "text", "text": KotoPrompt.system(for: mode)]],
             "messages": messages,
             // Caches the system prompt and conversation so far for the next message.
             "cache_control": ["type": "ephemeral"],
@@ -124,16 +133,18 @@ struct ClaudeChatService: ChatService {
     }
 
     /// Recent chat as API messages: must start with the user, and same-sender
-    /// messages in a row are merged into one turn.
+    /// messages in a row are merged into one turn. Group-chat messages keep their
+    /// "名前：" prefix, matching the format the model writes them in.
     private static func apiMessages(from history: [ChatMessage]) -> [[String: Any]] {
         var turns: [(role: String, texts: [String])] = []
         for message in history.suffix(historyLimit) {
             let role = message.sender == .user ? "user" : "assistant"
+            let text = message.speaker.map { "\($0)：\(message.text)" } ?? message.text
             if turns.isEmpty, role == "assistant" { continue }
             if turns.last?.role == role {
-                turns[turns.count - 1].texts.append(message.text)
+                turns[turns.count - 1].texts.append(text)
             } else {
-                turns.append((role, [message.text]))
+                turns.append((role, [text]))
             }
         }
         return turns.map { turn in

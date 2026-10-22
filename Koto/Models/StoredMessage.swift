@@ -7,6 +7,9 @@ final class StoredMessage {
     @Attribute(.unique) var id: UUID
     var isFromUser: Bool
     var text: String
+    var speaker: String?
+    /// The ChatMode this message belongs to; nil for messages saved before modes existed (friend).
+    var mode: String?
     var date: Date
     var isRead: Bool
     // JSON-encoded corrections, vocab, practiced words and explanation. Kept as plain
@@ -16,10 +19,12 @@ final class StoredMessage {
     var practicedData = Data()
     var explanationData: Data?
 
-    init(_ message: ChatMessage) {
+    init(_ message: ChatMessage, mode: ChatMode) {
         id = message.id
         isFromUser = message.sender == .user
         text = message.text
+        speaker = message.speaker
+        self.mode = mode.rawValue
         date = message.date
         isRead = message.isRead
         correctionsData = Data()
@@ -41,6 +46,7 @@ final class StoredMessage {
             id: id,
             sender: isFromUser ? .user : .bot,
             text: text,
+            speaker: speaker,
             date: date,
             corrections: (try? JSONDecoder().decode([Correction].self, from: correctionsData)) ?? [],
             vocab: (try? JSONDecoder().decode([VocabItem].self, from: vocabData)) ?? [],

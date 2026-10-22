@@ -18,6 +18,7 @@ struct ChatView: View {
                             }
                             MessageRow(
                                 message: message,
+                                persona: model.mode.persona(for: message.speaker),
                                 onVocabTap: { selectedVocab = VocabSelection(item: $0, message: message) },
                                 onWordTap: { wordLookup = WordLookup(text: $0, in: message) },
                                 onTranslate: { translating = TranslationTarget(id: message.id) }
@@ -26,7 +27,7 @@ struct ChatView: View {
                         }
 
                         if model.isBotTyping {
-                            TypingIndicatorRow()
+                            TypingIndicatorRow(persona: model.mode.persona(for: nil))
                                 .id("typing")
                         }
                     }
@@ -49,10 +50,13 @@ struct ChatView: View {
                 InputBar(text: $model.draft, canSend: model.canSend) { model.send() }
                     .background(.bar)
             }
-            .navigationTitle("こと")
+            .navigationTitle(model.mode.chatTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    ModeMenu(mode: $model.mode)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
                         VocabDeckView()
@@ -76,6 +80,31 @@ struct ChatView: View {
                 }
             }
         }
+    }
+}
+
+/// The chat title, which opens a menu for switching who you're talking to.
+private struct ModeMenu: View {
+    @Binding var mode: ChatMode
+
+    var body: some View {
+        Menu {
+            Picker("Chat with", selection: $mode) {
+                ForEach(ChatMode.allCases) { mode in
+                    Label(mode.title, systemImage: mode.systemImage)
+                        .tag(mode)
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(mode.chatTitle)
+                    .font(.headline)
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.semibold))
+            }
+            .foregroundStyle(.primary)
+        }
+        .accessibilityLabel("Chat mode: \(mode.title)")
     }
 }
 

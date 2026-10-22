@@ -3,6 +3,8 @@ import SwiftUI
 
 struct MessageRow: View {
     let message: ChatMessage
+    /// Name and avatar for a bot message's speaker.
+    let persona: Persona
     let onVocabTap: (VocabItem) -> Void
     /// Called with the text starting at a tapped word, for dictionary lookup.
     let onWordTap: (String) -> Void
@@ -18,9 +20,9 @@ struct MessageRow: View {
 
     private var botRow: some View {
         HStack(alignment: .top, spacing: 8) {
-            BotAvatar()
+            BotAvatar(persona: persona)
             VStack(alignment: .leading, spacing: 4) {
-                Text("こと")
+                Text(persona.name)
                     .font(.caption)
                     .foregroundStyle(Theme.metaText)
                 HStack(alignment: .bottom, spacing: 4) {
@@ -108,12 +110,14 @@ private struct TimeLabel: View {
 }
 
 struct BotAvatar: View {
+    let persona: Persona
+
     var body: some View {
-        Text("こ")
+        Text(persona.initial)
             .font(.headline)
             .foregroundStyle(.white)
             .frame(width: 36, height: 36)
-            .background(Theme.avatar, in: Circle())
+            .background(Color(light: persona.color, dark: persona.color), in: Circle())
     }
 }
 
@@ -180,9 +184,11 @@ private struct VocabChips: View {
 }
 
 struct TypingIndicatorRow: View {
+    let persona: Persona
+
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            BotAvatar()
+            BotAvatar(persona: persona)
             Image(systemName: "ellipsis")
                 .font(.title3)
                 .symbolEffect(.variableColor.iterative, options: .repeating)
@@ -195,6 +201,6 @@ struct TypingIndicatorRow: View {
                 .padding(.top, 18)
             Spacer()
         }
-        .accessibilityLabel("こと is typing")
+        .accessibilityLabel("\(persona.name) is typing")
     }
 }

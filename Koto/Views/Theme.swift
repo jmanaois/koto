@@ -7,7 +7,6 @@ enum Theme {
     static let userBubble = Color(light: 0x8DE055, dark: 0x5DBB4A)
     static let userBubbleText = Color.black
     static let botBubble = Color(light: 0xFFFFFF, dark: 0x2E323B)
-    static let avatar = Color(light: 0x2BB673, dark: 0x2BB673)
     /// Timestamps, 既読 and names drawn directly on the chat background.
     static let metaText = Color(light: 0x2B3A55, dark: 0x9AA3B5)
 }

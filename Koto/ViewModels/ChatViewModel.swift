@@ -8,31 +8,35 @@ final class ChatViewModel {
     var draft = ""
     private(set) var isBotTyping = false
 
+    /// Who the user is chatting with. Each mode keeps its own conversation.
+    var mode: ChatMode {
+        didSet {
+            guard mode != oldValue else { return }
+            UserDefaults.standard.set(mode.rawValue, forKey: Self.modeKey)
+            draft = ""
+            loadMessages()
+        }
+    }
+
     private let service: ChatService
     private let context: ModelContext
     /// Saved copies of `messages`, by id, so later changes can be written back.
     private var stored: [UUID: StoredMessage] = [:]
 
+    private static let modeKey = "chatMode"
+
     init(context: ModelContext, service: ChatService = ClaudeChatService()) {
         self.context = context
         self.service = service
-
-        let saved = (try? context.fetch(FetchDescriptor<StoredMessage>(sortBy: [SortDescriptor(\.date)]))) ?? []
-        for message in saved {
-            stored[message.id] = message
-        }
-        messages = saved.map(\.chatMessage)
-
-        if messages.isEmpty {
-            append(ChatMessage(sender: .bot, text: "やっほー！ことだよ👋\n日本語でなんでも話しかけてね。変なところがあったら直すよ！"))
-        }
+        mode = UserDefaults.standard.string(forKey: Self.modeKey).flatMap(ChatMode.init(rawValue:)) ?? .friend
+        loadMessages()
     }
 
     var canSend: Bool {
         !isBotTyping && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    /// Sends `text` if given (e.g. from a sample chip), otherwise the current draft.
+    /// Sends `text` if given, otherwise the current draft.
     func send(_ text: String? = nil) {
         let body = (text ?? draft).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !body.isEmpty, !isBotTyping else { return }
@@ -44,18 +48,27 @@ final class ChatViewModel {
 
         let history = messages.filter { !$0.isError }
         let practiceWords = duePracticeWords()
+        let mode = mode
         Task {
             defer { isBotTyping = false }
             do {
-                let response = try await service.reply(to: history, practiceWords: practiceWords)
+                let response = try await service.reply(to: history, practiceWords: practiceWords, mode: mode)
+                // The user may have switched modes while waiting; this reply belongs to the old chat.
+                guard mode == self.mode else { return }
                 let reviewed = reviewPracticedWords(response.practicedWords, offered: practiceWords)
                 update(at: userIndex) {
                     $0.corrections = response.corrections
                     $0.practicedWords = reviewed
                     $0.isRead = true
                 }
-                append(ChatMessage(sender: .bot, text: response.reply, vocab: response.newVocab))
+                let parts = Self.splitReply(response.reply, for: mode)
+                for (index, part) in parts.enumerated() {
+                    // New vocab goes under the last message of the reply.
+                    let vocab = index == parts.count - 1 ? response.newVocab : []
+                    append(ChatMessage(sender: .bot, text: part.text, speaker: part.speaker, vocab: vocab))
+                }
             } catch {
+                guard mode == self.mode else { return }
                 // Shown, but not saved or sent back to the bot.
                 messages.append(ChatMessage(
                     sender: .bot,
@@ -64,6 +77,27 @@ final class ChatViewModel {
                 ))
             }
         }
+    }
+
+    /// In a group chat the model writes one "名前：message" line per speaker; split those into
+    /// separate bubbles. Lines without a known name stay with the message before them.
+    static func splitReply(_ reply: String, for mode: ChatMode) -> [(speaker: String?, text: String)] {
+        guard mode == .group else { return [(nil, reply)] }
+
+        var parts: [(speaker: String?, text: String)] = []
+        for line in reply.split(separator: "\n") {
+            let line = line.trimmingCharacters(in: .whitespaces)
+            guard !line.isEmpty else { continue }
+            if let speaker = ChatMode.groupSpeakers.first(where: { line.hasPrefix($0 + "：") || line.hasPrefix($0 + ":") }) {
+                let text = line.dropFirst(speaker.count + 1).trimmingCharacters(in: .whitespaces)
+                parts.append((speaker, text))
+            } else if !parts.isEmpty {
+                parts[parts.count - 1].text += "\n" + line
+            } else {
+                parts.append((ChatMode.groupSpeakers[0], line))
+            }
+        }
+        return parts.isEmpty ? [(ChatMode.groupSpeakers[0], reply)] : parts
     }
 
     /// The most overdue words in the deck, for the bot to work into its reply.
@@ -110,9 +144,29 @@ final class ChatViewModel {
 
     // MARK: - Persistence
 
+    /// Loads the current mode's conversation, starting it with the mode's welcome if it's empty.
+    private func loadMessages() {
+        let modeName: String? = mode.rawValue
+        // Messages saved before modes existed have no mode and belong to the friend chat.
+        let includesUntagged = mode == .friend
+        let descriptor = FetchDescriptor<StoredMessage>(
+            predicate: #Predicate { $0.mode == modeName || (includesUntagged && $0.mode == nil) },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        let saved = (try? context.fetch(descriptor)) ?? []
+        stored = Dictionary(uniqueKeysWithValues: saved.map { ($0.id, $0) })
+        messages = saved.map(\.chatMessage)
+
+        if messages.isEmpty {
+            for (speaker, text) in mode.welcome {
+                append(ChatMessage(sender: .bot, text: text, speaker: speaker))
+            }
+        }
+    }
+
     private func append(_ message: ChatMessage) {
         messages.append(message)
-        let saved = StoredMessage(message)
+        let saved = StoredMessage(message, mode: mode)
         context.insert(saved)
         stored[message.id] = saved
         save()

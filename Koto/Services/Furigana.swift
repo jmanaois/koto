@@ -11,7 +11,7 @@ nonisolated struct FuriganaToken: Identifiable {
 
     /// UTF-16 offset of the token in the message, unique per token.
     let id: Int
-    let runs: [Run]
+    var runs: [Run]
     /// Text to look up when the token is tapped: from this word to the next
     /// non-Japanese character, so conjugations can match. nil if not tappable.
     let lookupText: String?
@@ -58,7 +58,24 @@ nonisolated enum Furigana {
         if cursor < utf16.count {
             tokens += plainTokens(substring(text, cursor, utf16.count), from: cursor)
         }
-        return tokens
+        return keepingPunctuationAttached(tokens)
+    }
+
+    /// Japanese text never starts a line with closing punctuation, so glue it onto the
+    /// word before it: then 「みんな。」 wraps as a unit instead of leaving 「。」 alone.
+    private static func keepingPunctuationAttached(_ tokens: [FuriganaToken]) -> [FuriganaToken] {
+        let closing = Set("、。，．！？!?）」』〜ー…・ｗw")
+        var result: [FuriganaToken] = []
+        for token in tokens {
+            let isClosingPunctuation = token.lookupText == nil && !token.isLineBreak
+                && token.runs.allSatisfy { $0.reading == nil && $0.text.allSatisfy(closing.contains) }
+            if isClosingPunctuation, let last = result.last, !last.isLineBreak {
+                result[result.count - 1].runs += token.runs
+            } else {
+                result.append(token)
+            }
+        }
+        return result
     }
 
     static func isJapanese(_ character: Character) -> Bool {
