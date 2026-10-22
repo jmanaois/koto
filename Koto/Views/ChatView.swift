@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct ChatView: View {
@@ -58,12 +59,21 @@ struct ChatView: View {
                 }
                 .background(.bar)
             }
-            .navigationTitle("コト")
+            .navigationTitle("こと")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        VocabDeckView()
+                    } label: {
+                        Label("My words", systemImage: "book")
+                    }
+                }
+            }
             .sheet(item: $selectedVocab) { item in
                 VocabDetailSheet(item: item)
-                    .presentationDetents([.height(240)])
+                    .presentationDetents([.height(260)])
             }
         }
     }
@@ -99,4 +109,5 @@ private struct SampleChips: View {
 
 #Preview {
     ChatView()
+        .modelContainer(for: SavedWord.self, inMemory: true)
 }

@@ -4,7 +4,7 @@ import Observation
 @Observable
 final class ChatViewModel {
     private(set) var messages: [ChatMessage] = [
-        ChatMessage(sender: .bot, text: "やっほー！コトだよ👋\n日本語でなんでも話しかけてね。変なところがあったら直すよ！"),
+        ChatMessage(sender: .bot, text: "やっほー！ことだよ👋\n日本語でなんでも話しかけてね。変なところがあったら直すよ！"),
     ]
     var draft = ""
     private(set) var isBotTyping = false

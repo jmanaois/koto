@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct MessageRow: View {
@@ -15,7 +16,7 @@ struct MessageRow: View {
         HStack(alignment: .top, spacing: 8) {
             BotAvatar()
             VStack(alignment: .leading, spacing: 4) {
-                Text("コト")
+                Text("こと")
                     .font(.caption)
                     .foregroundStyle(Theme.metaText)
                 HStack(alignment: .bottom, spacing: 4) {
@@ -88,7 +89,7 @@ private struct TimeLabel: View {
 
 struct BotAvatar: View {
     var body: some View {
-        Text("コ")
+        Text("こ")
             .font(.headline)
             .foregroundStyle(.white)
             .frame(width: 36, height: 36)
@@ -100,13 +101,22 @@ private struct VocabChips: View {
     let items: [VocabItem]
     let onTap: (VocabItem) -> Void
 
+    @Query private var savedWords: [SavedWord]
+
     var body: some View {
+        let saved = Set(savedWords.map(\.word))
         HStack(spacing: 6) {
             ForEach(items) { item in
+                let isSaved = saved.contains(item.word)
                 Button {
                     onTap(item)
                 } label: {
-                    Label(item.word, systemImage: "book.closed")
+                    Label {
+                        Text(item.word)
+                    } icon: {
+                        Image(systemName: isSaved ? "book.closed.fill" : "book.closed")
+                            .foregroundStyle(isSaved ? .green : .black)
+                    }
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -135,6 +145,6 @@ struct TypingIndicatorRow: View {
                 .padding(.top, 18)
             Spacer()
         }
-        .accessibilityLabel("コト is typing")
+        .accessibilityLabel("こと is typing")
     }
 }
