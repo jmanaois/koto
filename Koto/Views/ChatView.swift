@@ -6,6 +6,7 @@ struct ChatView: View {
     @State private var selectedVocab: VocabSelection?
     @State private var wordLookup: WordLookup?
     @State private var translating: TranslationTarget?
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
@@ -54,6 +55,9 @@ struct ChatView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Settings", systemImage: "gearshape") { showingSettings = true }
+                }
                 ToolbarItem(placement: .principal) {
                     ModeMenu(mode: $model.mode)
                 }
@@ -64,6 +68,9 @@ struct ChatView: View {
                         Label("My words", systemImage: "book")
                     }
                 }
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
             .sheet(item: $selectedVocab) { selection in
                 VocabDetailSheet(item: selection.item, example: selection.example)

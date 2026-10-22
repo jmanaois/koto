@@ -39,9 +39,11 @@ struct ClaudeChatService: ChatService {
         }
     }
 
-    func reply(to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode) async throws -> BotResponse {
+    func reply(
+        to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode, strictness: CorrectionStrictness
+    ) async throws -> BotResponse {
         // Like translations, the model now and then sends "reply": "". Ask once more before giving up.
-        let body = Self.body(history: history, practiceWords: practiceWords, mode: mode)
+        let body = Self.body(history: history, practiceWords: practiceWords, mode: mode, strictness: strictness)
         for _ in 0..<2 {
             let response: BotResponse = try await send(body)
             if !response.reply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return response }
@@ -106,7 +108,9 @@ struct ClaudeChatService: ChatService {
 
     // MARK: - Request
 
-    private static func body(history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode) -> [String: Any] {
+    private static func body(
+        history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode, strictness: CorrectionStrictness
+    ) -> [String: Any] {
         var messages = apiMessages(from: history)
         if !practiceWords.isEmpty, var last = messages.last, last["role"] as? String == "user" {
             // Practice words ride along with the newest user turn only, so earlier turns
@@ -120,7 +124,7 @@ struct ClaudeChatService: ChatService {
         return [
             "model": model,
             "max_tokens": 4000,
-            "system": [["type": "text", "text": KotoPrompt.system(for: mode)]],
+            "system": [["type": "text", "text": KotoPrompt.system(for: mode, strictness: strictness)]],
             "messages": messages,
             // Caches the system prompt and conversation so far for the next message.
             "cache_control": ["type": "ephemeral"],

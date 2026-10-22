@@ -49,10 +49,13 @@ final class ChatViewModel {
         let history = messages.filter { !$0.isError }
         let practiceWords = duePracticeWords()
         let mode = mode
+        let strictness = AppSettings.strictness
         Task {
             defer { isBotTyping = false }
             do {
-                let response = try await service.reply(to: history, practiceWords: practiceWords, mode: mode)
+                let response = try await service.reply(
+                    to: history, practiceWords: practiceWords, mode: mode, strictness: strictness
+                )
                 // The user may have switched modes while waiting; this reply belongs to the old chat.
                 guard mode == self.mode else { return }
                 let reviewed = reviewPracticedWords(response.practicedWords, offered: practiceWords)

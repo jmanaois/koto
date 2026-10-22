@@ -3,8 +3,9 @@ import Foundation
 /// Instructions and output format for こと. Each mode's prompt is byte-for-byte stable so the API can
 /// cache it; anything that changes per message (like practice words) goes in the latest user turn instead.
 nonisolated enum KotoPrompt {
-    static func system(for mode: ChatMode) -> String {
-        persona(for: mode) + "\n\n" + sharedRules + "\n\n" + registerRule(for: mode)
+    static func system(for mode: ChatMode, strictness: CorrectionStrictness) -> String {
+        persona(for: mode) + "\n\n" + sharedRules + "\n\n# How strict to be\n" + strictness.promptRule
+            + "\n\n" + registerRule(for: mode)
     }
 
     /// Who こと is in each mode and how they talk.
@@ -85,10 +86,7 @@ nonisolated enum KotoPrompt {
     - "original": the exact problematic part, copied from their message.
     - "suggested": the natural version for this conversation, or null if there is no single rewrite.
     - "explanation": one or two short, friendly sentences in plain English saying why.
-    Don't nitpick. If the message is fine for this conversation, return no corrections. Ignore punctuation, \
-    kanji-vs-kana choices, and anything that is just an input-method quirk. If the whole message is at the \
-    wrong politeness level, one register correction for the whole message is enough. At most three, most \
-    important first.
+    How many corrections to make depends on "How strict to be" below.
 
     # New vocabulary ("new_vocab")
     List 0–2 words or expressions from YOUR reply that an N4 learner probably doesn't know yet and that are \

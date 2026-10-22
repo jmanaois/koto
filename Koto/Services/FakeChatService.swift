@@ -4,7 +4,9 @@ import Foundation
 /// It recognizes a few common learner phrases and mistakes; everything else gets a
 /// generic casual reaction.
 struct FakeChatService: ChatService {
-    func reply(to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode) async throws -> BotResponse {
+    func reply(
+        to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode, strictness: CorrectionStrictness
+    ) async throws -> BotResponse {
         // Pretend to think, like a real network call would.
         try await Task.sleep(for: .milliseconds(Int.random(in: 700...1400)))
 

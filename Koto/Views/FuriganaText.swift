@@ -8,6 +8,9 @@ struct FuriganaText: View {
     private let lines: [[FuriganaToken]]
     /// Only reserve space above the text when something has a reading.
     private let hasReadings: Bool
+    @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
+
+    private var showsReadings: Bool { hasReadings && showFurigana }
 
     init(_ text: String, onWordTap: @escaping (String) -> Void) {
         self.onWordTap = onWordTap
@@ -28,11 +31,11 @@ struct FuriganaText: View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                 if line.isEmpty {
-                    TokenView(runs: [.init(text: " ", reading: nil)], showsReadings: hasReadings)
+                    TokenView(runs: [.init(text: " ", reading: nil)], showsReadings: showsReadings)
                 } else {
                     FlowLayout {
                         ForEach(line) { token in
-                            TokenView(runs: token.runs, showsReadings: hasReadings)
+                            TokenView(runs: token.runs, showsReadings: showsReadings)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     if let lookupText = token.lookupText {
@@ -62,7 +65,7 @@ private struct TokenView: View {
                     // and the reading is an overlay so a long one doesn't push words apart.
                     .padding(.top, showsReadings ? Self.readingSize + 2 : 0)
                     .overlay(alignment: .top) {
-                        if let reading = run.reading {
+                        if showsReadings, let reading = run.reading {
                             Text(reading)
                                 .font(.system(size: Self.readingSize))
                                 .opacity(0.75)
