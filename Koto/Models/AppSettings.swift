@@ -5,6 +5,7 @@ nonisolated enum AppSettings {
     static let strictnessKey = "correctionStrictness"
     static let furiganaKey = "showFurigana"
     static let fadeKnownFuriganaKey = "fadeKnownFurigana"
+    static let slowSpeechKey = "slowSpeech"
 
     static var strictness: CorrectionStrictness {
         UserDefaults.standard.string(forKey: strictnessKey).flatMap(CorrectionStrictness.init(rawValue:)) ?? .balanced

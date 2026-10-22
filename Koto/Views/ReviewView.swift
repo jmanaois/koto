@@ -42,6 +42,7 @@ struct ReviewView: View {
                 Text(card.word)
                     .font(.system(size: 44, weight: .bold))
                 if isShowingAnswer {
+                    SpeakButton(text: card.reading)
                     Divider()
                     if card.reading != card.word {
                         Text(card.reading)
@@ -53,7 +54,10 @@ struct ReviewView: View {
                         .multilineTextAlignment(.center)
                     if let sentence = card.exampleSentence {
                         VStack(spacing: 4) {
-                            FuriganaText(sentence, onWordTap: { _ in })
+                            HStack(alignment: .center, spacing: 8) {
+                                FuriganaText(sentence, onWordTap: { _ in })
+                                SpeakButton(text: sentence, font: .body)
+                            }
                             if let translation = card.exampleTranslation {
                                 Text(translation)
                                     .font(.footnote)

@@ -32,6 +32,7 @@ struct MessageRow: View {
                 if !message.isError {
                     HStack(spacing: 6) {
                         TranslateButton(action: onTranslate)
+                        ListenChip(text: message.text)
                         VocabChips(items: message.vocab, onTap: onVocabTap)
                     }
                 }
@@ -92,6 +93,9 @@ private struct Bubble: View {
             )
             // Words are laid out individually, so offer Copy instead of text selection.
             .contextMenu {
+                Button("Listen", systemImage: "speaker.wave.2") {
+                    Speech.shared.speak(text)
+                }
                 Button("Copy", systemImage: "doc.on.doc") {
                     UIPasteboard.general.string = text
                 }
@@ -118,6 +122,30 @@ struct BotAvatar: View {
             .foregroundStyle(.white)
             .frame(width: 36, height: 36)
             .background(Color(light: persona.color, dark: persona.color), in: Circle())
+    }
+}
+
+/// Speaker chip under a bot message; shows a stop icon while reading.
+private struct ListenChip: View {
+    let text: String
+
+    private var isSpeaking: Bool { Speech.shared.speakingText == text }
+
+    var body: some View {
+        Button {
+            Speech.shared.toggle(text)
+        } label: {
+            Image(systemName: isSpeaking ? "stop.fill" : "speaker.wave.2.fill")
+                .symbolEffect(.variableColor.iterative, options: .repeating, isActive: isSpeaking)
+                .font(.caption)
+                .frame(width: 16, height: 16)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(.white.opacity(0.85), in: Capsule())
+                .foregroundStyle(.black)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(isSpeaking ? "Stop" : "Listen")
     }
 }
 

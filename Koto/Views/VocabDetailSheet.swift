@@ -6,8 +6,11 @@ struct VocabDetailSheet: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            Text(item.word)
-                .font(.largeTitle.bold())
+            HStack(spacing: 12) {
+                Text(item.word)
+                    .font(.largeTitle.bold())
+                SpeakButton(text: item.reading)
+            }
             if item.reading != item.word {
                 Text(item.reading)
                     .font(.title3)

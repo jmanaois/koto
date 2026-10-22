@@ -62,6 +62,9 @@ private struct EntryRow: View {
                         .font(.title3)
                         .foregroundStyle(.secondary)
                 }
+                Spacer()
+                // The reading, so the voice can't pick the wrong one for the kanji.
+                SpeakButton(text: entry.reading)
             }
 
             let labels = Self.labels(for: entry)
