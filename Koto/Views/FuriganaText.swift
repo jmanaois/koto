@@ -9,6 +9,8 @@ struct FuriganaText: View {
     /// Only reserve space above the text when something has a reading.
     private let hasReadings: Bool
     @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
+    /// Deck words known well enough that their readings are hidden.
+    @Environment(\.knownWords) private var knownWords
 
     private var showsReadings: Bool { hasReadings && showFurigana }
 
@@ -31,11 +33,15 @@ struct FuriganaText: View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                 if line.isEmpty {
-                    TokenView(runs: [.init(text: " ", reading: nil)], showsReadings: showsReadings)
+                    TokenView(runs: [.init(text: " ", reading: nil)], reservesSpace: showsReadings, showsReadings: false)
                 } else {
                     FlowLayout {
                         ForEach(line) { token in
-                            TokenView(runs: token.runs, showsReadings: showsReadings)
+                            TokenView(
+                                runs: token.runs,
+                                reservesSpace: showsReadings,
+                                showsReadings: showsReadings && !Furigana.isForm(of: knownWords, token)
+                            )
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     if let lookupText = token.lookupText {
@@ -52,6 +58,8 @@ struct FuriganaText: View {
 
 private struct TokenView: View {
     let runs: [FuriganaToken.Run]
+    /// Keep room above the text so this word lines up with words that do show readings.
+    let reservesSpace: Bool
     let showsReadings: Bool
 
     private static let readingSize: CGFloat = 10
@@ -63,7 +71,7 @@ private struct TokenView: View {
                     .fixedSize()
                     // Space for the reading is reserved on every word so lines line up,
                     // and the reading is an overlay so a long one doesn't push words apart.
-                    .padding(.top, showsReadings ? Self.readingSize + 2 : 0)
+                    .padding(.top, reservesSpace ? Self.readingSize + 2 : 0)
                     .overlay(alignment: .top) {
                         if showsReadings, let reading = run.reading {
                             Text(reading)
@@ -120,4 +128,9 @@ private struct FlowLayout: Layout {
         }
         return rows
     }
+}
+
+extension EnvironmentValues {
+    /// Dictionary forms of deck words known well, whose furigana is hidden. Empty when fading is off.
+    @Entry var knownWords: Set<String> = []
 }

@@ -7,6 +7,12 @@ struct ChatView: View {
     @State private var wordLookup: WordLookup?
     @State private var translating: TranslationTarget?
     @State private var showingSettings = false
+    @Query private var savedWords: [SavedWord]
+    @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
+
+    private var knownWords: Set<String> {
+        fadeKnownFurigana ? Set(savedWords.filter(\.isKnownWell).map(\.word)) : []
+    }
 
     var body: some View {
         NavigationStack {
@@ -87,6 +93,7 @@ struct ChatView: View {
                 }
             }
         }
+        .environment(\.knownWords, knownWords)
     }
 }
 

@@ -22,6 +22,14 @@ final class SavedWord {
     var exampleSentence: String?
     var exampleTranslation: String?
 
+    /// FSRS stability, in days, at which a word counts as known well and its furigana fades.
+    /// A new word gets there after about four or five Good reviews in a row.
+    static let knownWellStability = 30.0
+
+    var isKnownWell: Bool {
+        lastReviewedAt != nil && stability >= Self.knownWellStability
+    }
+
     init(_ item: VocabItem, example: ExampleSentence? = nil) {
         word = item.word
         reading = item.reading

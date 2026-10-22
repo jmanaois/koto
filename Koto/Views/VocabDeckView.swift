@@ -76,7 +76,14 @@ struct VocabDeckView: View {
     @ViewBuilder
     private func dueLabel(for word: SavedWord) -> some View {
         Group {
-            if word.dueAt <= .now {
+            if word.isKnownWell, word.dueAt > .now {
+                // Not a Label: inside a List it pads the icon like a row icon.
+                HStack(spacing: 3) {
+                    Image(systemName: "checkmark.seal.fill")
+                    Text("Known")
+                }
+                .foregroundStyle(.green)
+            } else if word.dueAt <= .now {
                 Text("Due")
                     .foregroundStyle(Color.accentColor)
             } else {

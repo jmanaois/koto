@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage(AppSettings.strictnessKey) private var strictness = CorrectionStrictness.balanced
     @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
+    @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -30,10 +31,12 @@ struct SettingsView: View {
 
                 Section {
                     Toggle("Show furigana", isOn: $showFurigana)
+                    Toggle("Hide furigana on words I know", isOn: $fadeKnownFurigana)
+                        .disabled(!showFurigana)
                 } header: {
                     Text("Reading")
                 } footer: {
-                    Text("Readings above kanji in chat, translations and flashcards. Tap any word to look it up either way.")
+                    Text("Readings above kanji in chat, translations and flashcards. Words in My words marked Known (reviewed well several times in a row) lose their furigana so you practice reading them. Tap any word to look it up either way.")
                 }
 
                 Section {

@@ -89,6 +89,32 @@ nonisolated enum Furigana {
         }
     }
 
+    /// Whether `token` is a form of one of `knownWords` (dictionary forms like 食べる, 大変, 行く).
+    /// The kanji must match exactly and the token must start with the word's stem, so
+    /// 食べ(ました) and 行き(ました) match 食べる and 行く, but 食事 and 映画館 don't match 食べる and 映画.
+    static func isForm(of knownWords: Set<String>, _ token: FuriganaToken) -> Bool {
+        let text = token.runs.map(\.text).joined()
+        guard !knownWords.isEmpty, text.contains(where: isKanji) else { return false }
+        let core = kanjiCore(text)
+        return knownWords.contains { word in
+            word.contains(where: isKanji) && kanjiCore(word) == core && text.hasPrefix(stem(of: word))
+        }
+    }
+
+    /// The text up to and including its last kanji: 食べる → 食, 大変 → 大変.
+    private static func kanjiCore(_ text: String) -> String {
+        guard let last = text.lastIndex(where: isKanji) else { return "" }
+        return String(text[...last])
+    }
+
+    /// The part of a dictionary form that stays the same when it conjugates: the word minus a
+    /// trailing kana ending. 食べる → 食べ, 行く → 行, 面白い → 面白, 大変 → 大変.
+    private static func stem(of word: String) -> String {
+        let core = kanjiCore(word)
+        let rest = word.dropFirst(core.count)
+        return core + rest.dropLast()
+    }
+
     private static func isKanji(_ character: Character) -> Bool {
         character.unicodeScalars.allSatisfy { scalar in
             switch scalar.value {
