@@ -16,17 +16,27 @@ struct SaveWordButton: View {
         Group {
             if let savedWord {
                 VStack(spacing: 6) {
-                    Label("In my words", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.headline)
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("In my words")
+                    }
+                    .foregroundStyle(.green)
+                    .font(.headline)
                     Button("Remove", role: .destructive) {
                         context.delete(savedWord)
                     }
                     .font(.footnote)
                 }
             } else {
-                Button("Add to my words", systemImage: "plus") {
+                Button {
                     context.insert(SavedWord(item))
+                } label: {
+                    // Not a Label (here or above): inside a List, Label tints its icon
+                    // with the accent color and pads it like a list icon.
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                        Text("Add to my words")
+                    }
                 }
                 .buttonStyle(.borderedProminent)
             }
