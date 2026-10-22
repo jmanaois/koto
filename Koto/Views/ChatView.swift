@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct ChatView: View {
-    @State private var model = ChatViewModel()
+    @Bindable var model: ChatViewModel
     @State private var selectedVocab: VocabItem?
 
     /// Sample sentences so the fake bot's corrections can be tried without a Japanese keyboard.
@@ -19,15 +19,10 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 14) {
-                        Text("今日")
-                            .font(.caption2.weight(.medium))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(.black.opacity(0.2), in: Capsule())
-                            .padding(.top, 4)
-
-                        ForEach(model.messages) { message in
+                        ForEach(Array(model.messages.enumerated()), id: \.element.id) { index, message in
+                            if index == 0 || !Calendar.current.isDate(message.date, inSameDayAs: model.messages[index - 1].date) {
+                                DatePill(date: message.date)
+                            }
                             MessageRow(message: message) { selectedVocab = $0 }
                                 .id(message.id)
                         }
@@ -79,6 +74,28 @@ struct ChatView: View {
     }
 }
 
+/// LINE-style day separator: 今日, 昨日, or a date like 10月20日(月).
+private struct DatePill: View {
+    let date: Date
+
+    private var label: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "今日" }
+        if calendar.isDateInYesterday(date) { return "昨日" }
+        return date.formatted(.dateTime.month().day().weekday(.abbreviated).locale(Locale(identifier: "ja_JP")))
+    }
+
+    var body: some View {
+        Text(label)
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(.black.opacity(0.2), in: Capsule())
+            .padding(.top, 4)
+    }
+}
+
 private struct SampleChips: View {
     let samples: [String]
     let isDisabled: Bool
@@ -108,6 +125,10 @@ private struct SampleChips: View {
 }
 
 #Preview {
-    ChatView()
-        .modelContainer(for: SavedWord.self, inMemory: true)
+    let container = try! ModelContainer(
+        for: SavedWord.self, StoredMessage.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    ChatView(model: ChatViewModel(context: container.mainContext))
+        .modelContainer(container)
 }

@@ -1,12 +1,12 @@
 import Foundation
 
-enum Sender {
+nonisolated enum Sender {
     case user
     case bot
 }
 
-struct ChatMessage: Identifiable, Equatable {
-    let id = UUID()
+nonisolated struct ChatMessage: Identifiable, Equatable {
+    var id = UUID()
     let sender: Sender
     let text: String
     var date = Date()
@@ -21,7 +21,7 @@ struct ChatMessage: Identifiable, Equatable {
 /// What the bot returns for each user message.
 /// Mirrors the JSON the real LLM will be asked to produce, so swapping
 /// FakeChatService for a real one doesn't change the UI.
-struct BotResponse: Codable {
+nonisolated struct BotResponse: Codable {
     let reply: String
     let corrections: [Correction]
     let newVocab: [VocabItem]
@@ -33,7 +33,7 @@ struct BotResponse: Codable {
     }
 }
 
-struct Correction: Codable, Hashable {
+nonisolated struct Correction: Codable, Hashable {
     enum Kind: String, Codable {
         /// Actually wrong (particles, conjugation, spelling).
         case grammar
@@ -58,7 +58,7 @@ struct Correction: Codable, Hashable {
     let explanation: String
 }
 
-struct VocabItem: Codable, Hashable, Identifiable {
+nonisolated struct VocabItem: Codable, Hashable, Identifiable {
     var id: String { word }
     let word: String
     let reading: String
