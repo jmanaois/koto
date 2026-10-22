@@ -13,7 +13,7 @@ final class ChatViewModel {
     /// Saved copies of `messages`, by id, so later changes can be written back.
     private var stored: [UUID: StoredMessage] = [:]
 
-    init(context: ModelContext, service: ChatService = FakeChatService()) {
+    init(context: ModelContext, service: ChatService = ClaudeChatService()) {
         self.context = context
         self.service = service
 
@@ -42,19 +42,38 @@ final class ChatViewModel {
         let userIndex = messages.count - 1
         isBotTyping = true
 
+        let history = messages.filter { !$0.isError }
+        let practiceWords = duePracticeWords()
         Task {
             defer { isBotTyping = false }
             do {
-                let response = try await service.reply(to: messages)
+                let response = try await service.reply(to: history, practiceWords: practiceWords)
                 update(at: userIndex) {
                     $0.corrections = response.corrections
                     $0.isRead = true
                 }
                 append(ChatMessage(sender: .bot, text: response.reply, vocab: response.newVocab))
             } catch {
-                append(ChatMessage(sender: .bot, text: "ごめん、エラーが出ちゃった🙏 もう一回送ってみて！"))
+                // Shown, but not saved or sent back to the bot.
+                messages.append(ChatMessage(
+                    sender: .bot,
+                    text: "ごめん、エラーが出ちゃった🙏\n\(error.localizedDescription)",
+                    isError: true
+                ))
             }
         }
+    }
+
+    /// The most overdue words in the deck, for the bot to work into its reply.
+    private func duePracticeWords(limit: Int = 5) -> [VocabItem] {
+        let now = Date.now
+        var descriptor = FetchDescriptor<SavedWord>(
+            predicate: #Predicate { $0.dueAt <= now },
+            sortBy: [SortDescriptor(\.dueAt)]
+        )
+        descriptor.fetchLimit = limit
+        let words = (try? context.fetch(descriptor)) ?? []
+        return words.map { VocabItem(word: $0.word, reading: $0.reading, meaning: $0.meaning) }
     }
 
     // MARK: - Persistence

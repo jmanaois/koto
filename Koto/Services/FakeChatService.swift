@@ -1,10 +1,10 @@
 import Foundation
 
-/// A scripted stand-in for the real bot so the UI can be built without API calls.
+/// A scripted stand-in for the real bot, for previews and testing the UI without API calls.
 /// It recognizes a few common learner phrases and mistakes; everything else gets a
 /// generic casual reaction.
 struct FakeChatService: ChatService {
-    func reply(to history: [ChatMessage]) async throws -> BotResponse {
+    func reply(to history: [ChatMessage], practiceWords: [VocabItem]) async throws -> BotResponse {
         // Pretend to think, like a real network call would.
         try await Task.sleep(for: .milliseconds(Int.random(in: 700...1400)))
 

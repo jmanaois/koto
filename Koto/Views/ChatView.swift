@@ -138,6 +138,6 @@ private struct SampleChips: View {
         for: SavedWord.self, StoredMessage.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    ChatView(model: ChatViewModel(context: container.mainContext))
+    ChatView(model: ChatViewModel(context: container.mainContext, service: FakeChatService()))
         .modelContainer(container)
 }

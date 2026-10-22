@@ -65,18 +65,9 @@ private struct Bubble: View {
     }
 
     var body: some View {
-        // Every Japanese word is a link; tinting links with the text color keeps
-        // the bubble looking like plain text.
-        Text(TappableText.attributed(text))
+        FuriganaText(text, onWordTap: onWordTap)
             .font(.body)
             .foregroundStyle(textColor)
-            .tint(textColor)
-            .environment(\.openURL, OpenURLAction { url in
-                if let lookup = TappableText.lookupText(in: text, for: url) {
-                    onWordTap(lookup)
-                }
-                return .handled
-            })
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
@@ -89,7 +80,12 @@ private struct Bubble: View {
                     topTrailingRadius: sender == .user ? 4 : 18
                 )
             )
-            .textSelection(.enabled)
+            // Words are laid out individually, so offer Copy instead of text selection.
+            .contextMenu {
+                Button("Copy", systemImage: "doc.on.doc") {
+                    UIPasteboard.general.string = text
+                }
+            }
     }
 }
 

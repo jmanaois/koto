@@ -16,6 +16,8 @@ nonisolated struct ChatMessage: Identifiable, Equatable {
     var vocab: [VocabItem] = []
     /// Shows 既読 next to a user message once the bot has replied.
     var isRead = false
+    /// An error shown in the chat. Not saved, and not sent to the bot as history.
+    var isError = false
 }
 
 /// What the bot returns for each user message.
