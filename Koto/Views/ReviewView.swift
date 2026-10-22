@@ -51,6 +51,18 @@ struct ReviewView: View {
                     Text(card.meaning)
                         .font(.title3)
                         .multilineTextAlignment(.center)
+                    if let sentence = card.exampleSentence {
+                        VStack(spacing: 4) {
+                            FuriganaText(sentence, onWordTap: { _ in })
+                            if let translation = card.exampleTranslation {
+                                Text(translation)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .padding(.top, 8)
+                    }
                 }
             }
             .padding(24)

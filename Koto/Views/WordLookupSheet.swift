@@ -6,10 +6,13 @@ struct WordLookup: Identifiable {
     /// Text from the tapped word onward, e.g. 食べましたか.
     let text: String
     let result: LookupResult?
+    /// The sentence the word was tapped in, saved with the word for its flashcard.
+    let example: ExampleSentence?
 
-    init(text: String) {
+    init(text: String, in message: ChatMessage) {
         self.text = text
         result = JapaneseDictionary.shared.lookup(text)
+        example = ExampleSentence(from: message, containing: result?.matched ?? text)
     }
 }
 
@@ -23,7 +26,7 @@ struct WordLookupSheet: View {
                     ForEach(result.entries) { entry in
                         Section {
                             EntryRow(entry: entry)
-                            SaveWordButton(item: entry.vocabItem)
+                            SaveWordButton(item: entry.vocabItem, example: lookup.example)
                                 .frame(maxWidth: .infinity)
                         }
                     }

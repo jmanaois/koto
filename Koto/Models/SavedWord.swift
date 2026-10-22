@@ -18,12 +18,18 @@ final class SavedWord {
     var reviewCount: Int = 0
     var lapses: Int = 0
 
-    init(_ item: VocabItem) {
+    /// The chat sentence the word was saved from, and its translation if known.
+    var exampleSentence: String?
+    var exampleTranslation: String?
+
+    init(_ item: VocabItem, example: ExampleSentence? = nil) {
         word = item.word
         reading = item.reading
         meaning = item.meaning
         addedAt = .now
         dueAt = .now
+        exampleSentence = example?.text
+        exampleTranslation = example?.translation
     }
 
     private var memoryState: FSRS.MemoryState? {

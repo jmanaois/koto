@@ -2,6 +2,7 @@ import SwiftUI
 
 struct VocabDetailSheet: View {
     let item: VocabItem
+    var example: ExampleSentence?
 
     var body: some View {
         VStack(spacing: 10) {
@@ -16,7 +17,7 @@ struct VocabDetailSheet: View {
                 .font(.body)
                 .multilineTextAlignment(.center)
 
-            SaveWordButton(item: item)
+            SaveWordButton(item: item, example: example)
                 .padding(.top, 6)
         }
         .padding()

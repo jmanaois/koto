@@ -4,6 +4,8 @@ import SwiftUI
 /// "Add to my words", or "In my words" with a Remove option once saved.
 struct SaveWordButton: View {
     let item: VocabItem
+    /// Where the word was seen in chat, saved with it for the flashcard.
+    var example: ExampleSentence?
 
     @Environment(\.modelContext) private var context
     @Query private var savedWords: [SavedWord]
@@ -29,7 +31,7 @@ struct SaveWordButton: View {
                 }
             } else {
                 Button {
-                    context.insert(SavedWord(item))
+                    context.insert(SavedWord(item, example: example))
                 } label: {
                     // Not a Label (here or above): inside a List, Label tints its icon
                     // with the accent color and pads it like a list icon.

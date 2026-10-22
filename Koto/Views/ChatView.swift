@@ -3,7 +3,7 @@ import SwiftUI
 
 struct ChatView: View {
     @Bindable var model: ChatViewModel
-    @State private var selectedVocab: VocabItem?
+    @State private var selectedVocab: VocabSelection?
     @State private var wordLookup: WordLookup?
     @State private var translating: TranslationTarget?
 
@@ -18,8 +18,8 @@ struct ChatView: View {
                             }
                             MessageRow(
                                 message: message,
-                                onVocabTap: { selectedVocab = $0 },
-                                onWordTap: { wordLookup = WordLookup(text: $0) },
+                                onVocabTap: { selectedVocab = VocabSelection(item: $0, message: message) },
+                                onWordTap: { wordLookup = WordLookup(text: $0, in: message) },
                                 onTranslate: { translating = TranslationTarget(id: message.id) }
                             )
                             .id(message.id)
@@ -61,8 +61,8 @@ struct ChatView: View {
                     }
                 }
             }
-            .sheet(item: $selectedVocab) { item in
-                VocabDetailSheet(item: item)
+            .sheet(item: $selectedVocab) { selection in
+                VocabDetailSheet(item: selection.item, example: selection.example)
                     .presentationDetents([.height(260)])
             }
             .sheet(item: $wordLookup) { lookup in
@@ -76,6 +76,18 @@ struct ChatView: View {
                 }
             }
         }
+    }
+}
+
+/// A highlighted word tapped under a bot message, with the sentence it came from.
+private struct VocabSelection: Identifiable {
+    let item: VocabItem
+    let example: ExampleSentence?
+    var id: String { item.id }
+
+    init(item: VocabItem, message: ChatMessage) {
+        self.item = item
+        example = ExampleSentence(from: message, containing: item.word)
     }
 }
 

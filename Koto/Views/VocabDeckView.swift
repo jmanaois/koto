@@ -44,6 +44,12 @@ struct VocabDeckView: View {
                         Text(word.meaning)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                        if let sentence = word.exampleSentence {
+                            Text(sentence)
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .lineLimit(1)
+                        }
                     }
                     .padding(.vertical, 2)
                 }
