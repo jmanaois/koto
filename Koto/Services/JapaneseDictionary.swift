@@ -148,9 +148,11 @@ nonisolated enum Deinflector {
             rules += froms.map { Rule(from: $0, to: to, pos: pos) }
         }
 
-        // 行く is the only verb whose て/た form is って/った with a く ending. Listed first
-        // so 行って prefers 行く over 行う when both match.
-        add(["って", "った"], "く", "v5k")
+        // 行く is the only verb whose て/た form is って/った with a く ending. Spelled out with
+        // its stem so it can't turn other verbs into く verbs (あった → 開く instead of ある),
+        // and listed first so 行って prefers 行く over 行う.
+        add(["行って", "行った"], "行く", "v5k")
+        add(["いって", "いった"], "いく", "v5k")
 
         // Godan verbs: (dictionary ending, i-row, a-row, e-row, o-row, te, ta, pos)
         let godan: [(String, String, String, String, String, String, String, String)] = [

@@ -5,6 +5,7 @@ struct ChatView: View {
     @Bindable var model: ChatViewModel
     @State private var selectedVocab: VocabItem?
     @State private var wordLookup: WordLookup?
+    @State private var translating: TranslationTarget?
 
     var body: some View {
         NavigationStack {
@@ -18,7 +19,8 @@ struct ChatView: View {
                             MessageRow(
                                 message: message,
                                 onVocabTap: { selectedVocab = $0 },
-                                onWordTap: { wordLookup = WordLookup(text: $0) }
+                                onWordTap: { wordLookup = WordLookup(text: $0) },
+                                onTranslate: { translating = TranslationTarget(id: message.id) }
                             )
                             .id(message.id)
                         }
@@ -67,8 +69,19 @@ struct ChatView: View {
                 WordLookupSheet(lookup: lookup)
                     .presentationDetents([.medium, .large])
             }
+            .sheet(item: $translating) { target in
+                if let message = model.messages.first(where: { $0.id == target.id }) {
+                    ExplanationSheet(message: message) { try await model.explain(target.id) }
+                        .presentationDetents([.medium, .large])
+                }
+            }
         }
     }
+}
+
+/// The bot message whose translation sheet is open.
+private struct TranslationTarget: Identifiable {
+    let id: UUID
 }
 
 /// LINE-style day separator: 今日, 昨日, or a date like 10月20日(月).

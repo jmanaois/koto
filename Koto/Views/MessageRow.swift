@@ -6,6 +6,8 @@ struct MessageRow: View {
     let onVocabTap: (VocabItem) -> Void
     /// Called with the text starting at a tapped word, for dictionary lookup.
     let onWordTap: (String) -> Void
+    /// Opens the translation and breakdown of a bot message.
+    let onTranslate: () -> Void
 
     var body: some View {
         switch message.sender {
@@ -25,8 +27,11 @@ struct MessageRow: View {
                     Bubble(text: message.text, sender: .bot, onWordTap: onWordTap)
                     TimeLabel(date: message.date)
                 }
-                if !message.vocab.isEmpty {
-                    VocabChips(items: message.vocab, onTap: onVocabTap)
+                if !message.isError {
+                    HStack(spacing: 6) {
+                        TranslateButton(action: onTranslate)
+                        VocabChips(items: message.vocab, onTap: onVocabTap)
+                    }
                 }
             }
             Spacer(minLength: 40)
@@ -46,6 +51,9 @@ struct MessageRow: View {
                 .font(.caption2)
                 .foregroundStyle(Theme.metaText)
                 Bubble(text: message.text, sender: .user, onWordTap: onWordTap)
+            }
+            if !message.practicedWords.isEmpty {
+                ReviewedBadge(words: message.practicedWords)
             }
             if !message.corrections.isEmpty {
                 CorrectionsView(corrections: message.corrections)
@@ -106,6 +114,36 @@ struct BotAvatar: View {
             .foregroundStyle(.white)
             .frame(width: 36, height: 36)
             .background(Theme.avatar, in: Circle())
+    }
+}
+
+private struct TranslateButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label("Translate", systemImage: "character.bubble")
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(.white.opacity(0.85), in: Capsule())
+                .foregroundStyle(.black)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Shown under a user message when it used due practice words correctly.
+private struct ReviewedBadge: View {
+    let words: [String]
+
+    var body: some View {
+        Label("Reviewed \(words.joined(separator: "、"))", systemImage: "checkmark.circle.fill")
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(.white.opacity(0.9), in: Capsule())
+            .foregroundStyle(.green)
     }
 }
 

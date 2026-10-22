@@ -48,8 +48,10 @@ final class ChatViewModel {
             defer { isBotTyping = false }
             do {
                 let response = try await service.reply(to: history, practiceWords: practiceWords)
+                let reviewed = reviewPracticedWords(response.practicedWords, offered: practiceWords)
                 update(at: userIndex) {
                     $0.corrections = response.corrections
+                    $0.practicedWords = reviewed
                     $0.isRead = true
                 }
                 append(ChatMessage(sender: .bot, text: response.reply, vocab: response.newVocab))
@@ -74,6 +76,34 @@ final class ChatViewModel {
         descriptor.fetchLimit = limit
         let words = (try? context.fetch(descriptor)) ?? []
         return words.map { VocabItem(word: $0.word, reading: $0.reading, meaning: $0.meaning) }
+    }
+
+    /// Using a due word correctly in chat counts as remembering it (rated Good).
+    /// Only words that were actually offered as practice words count.
+    /// - Returns: the words that were reviewed.
+    private func reviewPracticedWords(_ used: [String], offered: [VocabItem]) -> [String] {
+        let offeredWords = Set(offered.map(\.word))
+        let words = used.filter(offeredWords.contains)
+        guard !words.isEmpty else { return [] }
+
+        let now = Date.now
+        let descriptor = FetchDescriptor<SavedWord>(predicate: #Predicate { words.contains($0.word) && $0.dueAt <= now })
+        let saved = (try? context.fetch(descriptor)) ?? []
+        for word in saved {
+            word.review(.good)
+        }
+        save()
+        return saved.map(\.word)
+    }
+
+    /// Fetches and saves an English translation and breakdown of a bot message.
+    func explain(_ id: UUID) async throws {
+        guard let index = messages.firstIndex(where: { $0.id == id }), messages[index].explanation == nil else { return }
+        let context = Array(messages[..<index].filter { !$0.isError }.suffix(4))
+        let explanation = try await service.explain(messages[index].text, context: context)
+        if let index = messages.firstIndex(where: { $0.id == id }) {
+            update(at: index) { $0.explanation = explanation }
+        }
     }
 
     // MARK: - Persistence

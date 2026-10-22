@@ -44,6 +44,10 @@ nonisolated enum KotoPrompt {
     Some user messages end with a <practice_words> list: words the user is currently reviewing. Work one or \
     two of them into your reply when they fit naturally. Don't force them, don't use them all, and never \
     mention the list. If the user uses one correctly, you can react to that naturally.
+
+    In "practiced_words", list each practice word that the user's latest message uses correctly: the right \
+    meaning, used naturally (conjugated forms count). Copy each word exactly as it appears in the practice \
+    list. Leave it empty if there is no list or the user didn't use any of them correctly.
     """
 
     /// JSON schema for the structured output; mirrors BotResponse.
@@ -79,8 +83,46 @@ nonisolated enum KotoPrompt {
                         "additionalProperties": false,
                     ],
                 ],
+                "practiced_words": ["type": "array", "items": ["type": "string"]],
             ],
-            "required": ["reply", "corrections", "new_vocab"],
+            "required": ["reply", "corrections", "new_vocab", "practiced_words"],
+            "additionalProperties": false,
+        ]
+    }
+
+    // MARK: - Translate / explain
+
+    static let explainSystem = """
+    You help a learner of Japanese at roughly JLPT N4 understand casual Japanese chat messages. \
+    You get one message from their Japanese chat partner, plus a few earlier messages for context.
+
+    - "translation": a natural English translation of the message that keeps its casual tone.
+    - "breakdown": the message split into its meaningful chunks, in order: words, set expressions, \
+    conjugations and sentence-ending particles. For each, "phrase" is the chunk exactly as written, and \
+    "explanation" is a short plain-English note: what it means and, where useful, the dictionary form, the \
+    grammar, or the casual nuance (for example "〜てる = casual 〜ている, ongoing action"). Skip punctuation \
+    and emoji, and keep the whole breakdown to at most eight chunks by grouping very simple parts.
+    """
+
+    static var explanationSchema: [String: Any] {
+        [
+            "type": "object",
+            "properties": [
+                "translation": ["type": "string"],
+                "breakdown": [
+                    "type": "array",
+                    "items": [
+                        "type": "object",
+                        "properties": [
+                            "phrase": ["type": "string"],
+                            "explanation": ["type": "string"],
+                        ],
+                        "required": ["phrase", "explanation"],
+                        "additionalProperties": false,
+                    ],
+                ],
+            ],
+            "required": ["translation", "breakdown"],
             "additionalProperties": false,
         ]
     }

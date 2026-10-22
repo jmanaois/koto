@@ -34,6 +34,27 @@ struct ClaudeChatService: ChatService {
     }
 
     func reply(to history: [ChatMessage], practiceWords: [VocabItem]) async throws -> BotResponse {
+        try await send(Self.body(history: history, practiceWords: practiceWords))
+    }
+
+    func explain(_ text: String, context: [ChatMessage]) async throws -> MessageExplanation {
+        let earlier = context.map { ($0.sender == .user ? "Learner: " : "Partner: ") + $0.text }
+        let prompt = "<earlier_messages>\n\(earlier.joined(separator: "\n"))\n</earlier_messages>\n\n"
+            + "<message>\n\(text)\n</message>"
+        return try await send([
+            "model": Self.model,
+            "max_tokens": 4000,
+            "system": [["type": "text", "text": KotoPrompt.explainSystem]],
+            "messages": [["role": "user", "content": [["type": "text", "text": prompt]]]],
+            "output_config": [
+                "effort": "low",
+                "format": ["type": "json_schema", "schema": KotoPrompt.explanationSchema],
+            ],
+        ])
+    }
+
+    /// Sends a Messages API request and decodes the JSON the model wrote.
+    private func send<Output: Decodable>(_ body: [String: Any]) async throws -> Output {
         guard let apiKey = Self.apiKey() else { throw ServiceError.missingAPIKey }
 
         var request = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
@@ -42,7 +63,7 @@ struct ClaudeChatService: ChatService {
         request.setValue("application/json", forHTTPHeaderField: "content-type")
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.setValue("2026-10-21", forHTTPHeaderField: "anthropic-version")
-        request.httpBody = try JSONSerialization.data(withJSONObject: Self.body(history: history, practiceWords: practiceWords))
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await URLSession.shared.data(for: request)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
@@ -59,9 +80,9 @@ struct ClaudeChatService: ChatService {
         }
         // With thinking on, the content can start with thinking blocks; the JSON is in the text block.
         guard let text = message.content.first(where: { $0.type == "text" })?.text,
-              let response = try? JSONDecoder().decode(BotResponse.self, from: Data(text.utf8))
+              let output = try? JSONDecoder().decode(Output.self, from: Data(text.utf8))
         else { throw ServiceError.unreadableResponse }
-        return response
+        return output
     }
 
     // MARK: - Request

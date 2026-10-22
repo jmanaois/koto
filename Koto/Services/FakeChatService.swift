@@ -10,7 +10,16 @@ struct FakeChatService: ChatService {
 
         let text = history.last(where: { $0.sender == .user })?.text ?? ""
         let (reply, vocab) = Self.reaction(to: text)
-        return BotResponse(reply: reply, corrections: Self.corrections(for: text), newVocab: vocab)
+        let practiced = practiceWords.map(\.word).filter { text.contains($0) }
+        return BotResponse(reply: reply, corrections: Self.corrections(for: text), newVocab: vocab, practicedWords: practiced)
+    }
+
+    func explain(_ text: String, context: [ChatMessage]) async throws -> MessageExplanation {
+        try await Task.sleep(for: .milliseconds(600))
+        return MessageExplanation(
+            translation: "(Sample translation; the real one comes from Claude.)",
+            breakdown: [MessageExplanation.Part(phrase: text, explanation: "Sample explanation.")]
+        )
     }
 
     // MARK: - Corrections
