@@ -35,7 +35,9 @@ nonisolated enum FSRS {
         0.40255, 1.18385, 3.173, 15.69105, 7.1949, 0.5345, 1.4604, 0.0046, 1.54575, 0.1192,
         1.01925, 1.9395, 0.11, 0.29605, 2.2698, 0.2315, 2.9898, 0.51655, 0.6621,
     ]
-    static let desiredRetention = 0.9
+    /// Target recall probability when a card comes due. Higher means shorter intervals;
+    /// 0.95 brings a new card rated Good back the next day instead of in 3 days.
+    static let desiredRetention = 0.95
     static let maximumIntervalDays = 365.0
     /// A card rated Again comes back in the same session after this delay.
     static let relearnDelay: TimeInterval = 60
