@@ -15,7 +15,7 @@ personal app but not for one shared with others. To set it up:
 3. Rebuild.
 
 Without a key, the chat shows an error asking for one. `FakeChatService` is a scripted stand-in
-used by SwiftUI previews. The "Try:" chips send sample sentences without a Japanese keyboard.
+used by SwiftUI previews.
 
 ## Credits
 
