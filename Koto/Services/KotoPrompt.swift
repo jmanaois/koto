@@ -96,7 +96,8 @@ nonisolated enum KotoPrompt {
     You help a learner of Japanese at roughly JLPT N4 understand casual Japanese chat messages. \
     You get one message from their Japanese chat partner, plus a few earlier messages for context.
 
-    - "translation": a natural English translation of the message that keeps its casual tone.
+    - "translation": a natural English translation of the whole message that keeps its casual tone. \
+    Never leave it empty.
     - "breakdown": the message split into its meaningful chunks, in order: words, set expressions, \
     conjugations and sentence-ending particles. For each, "phrase" is the chunk exactly as written, and \
     "explanation" is a short plain-English note: what it means and, where useful, the dictionary form, the \

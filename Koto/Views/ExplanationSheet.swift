@@ -16,7 +16,7 @@ struct ExplanationSheet: View {
                         .padding(.vertical, 4)
                 }
 
-                if let explanation = message.explanation {
+                if let explanation = message.explanation, explanation.isComplete {
                     Section("Translation") {
                         Text(explanation.translation)
                     }

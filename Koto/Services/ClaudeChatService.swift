@@ -16,6 +16,7 @@ struct ClaudeChatService: ChatService {
         case refused
         case truncated
         case unreadableResponse
+        case emptyTranslation
 
         var errorDescription: String? {
             switch self {
@@ -29,6 +30,8 @@ struct ClaudeChatService: ChatService {
                 "The reply was cut off. Try again."
             case .unreadableResponse:
                 "Couldn't read the reply from the API."
+            case .emptyTranslation:
+                "The translation came back empty. Try again."
             }
         }
     }
@@ -41,7 +44,7 @@ struct ClaudeChatService: ChatService {
         let earlier = context.map { ($0.sender == .user ? "Learner: " : "Partner: ") + $0.text }
         let prompt = "<earlier_messages>\n\(earlier.joined(separator: "\n"))\n</earlier_messages>\n\n"
             + "<message>\n\(text)\n</message>"
-        return try await send([
+        let body: [String: Any] = [
             "model": Self.model,
             "max_tokens": 4000,
             "system": [["type": "text", "text": KotoPrompt.explainSystem]],
@@ -50,7 +53,14 @@ struct ClaudeChatService: ChatService {
                 "effort": "low",
                 "format": ["type": "json_schema", "schema": KotoPrompt.explanationSchema],
             ],
-        ])
+        ]
+        // The schema can't require a non-empty string, and now and then the model sends
+        // "translation": "". Ask once more before giving up.
+        for _ in 0..<2 {
+            let explanation: MessageExplanation = try await send(body)
+            if explanation.isComplete { return explanation }
+        }
+        throw ServiceError.emptyTranslation
     }
 
     /// Sends a Messages API request and decodes the JSON the model wrote.

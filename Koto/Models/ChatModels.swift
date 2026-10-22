@@ -68,6 +68,11 @@ nonisolated struct MessageExplanation: Codable, Hashable {
 
     let translation: String
     let breakdown: [Part]
+
+    /// The model occasionally leaves the translation empty; such a result is fetched again.
+    var isComplete: Bool {
+        !translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }
 
 nonisolated struct Correction: Codable, Hashable {

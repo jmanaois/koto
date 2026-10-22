@@ -98,7 +98,9 @@ final class ChatViewModel {
 
     /// Fetches and saves an English translation and breakdown of a bot message.
     func explain(_ id: UUID) async throws {
-        guard let index = messages.firstIndex(where: { $0.id == id }), messages[index].explanation == nil else { return }
+        guard let index = messages.firstIndex(where: { $0.id == id }),
+              messages[index].explanation?.isComplete != true
+        else { return }
         let context = Array(messages[..<index].filter { !$0.isError }.suffix(4))
         let explanation = try await service.explain(messages[index].text, context: context)
         if let index = messages.firstIndex(where: { $0.id == id }) {
