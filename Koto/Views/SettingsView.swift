@@ -66,7 +66,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Backup")
                 } footer: {
-                    Text("Saves your words (with review history) and all chats to a file in the Files app, so you keep them if the app is deleted. Importing adds what's missing and never deletes anything.")
+                    Text("Saves your words and grammar (with review history), mistakes and all chats to a file in the Files app, so you keep them if the app is deleted. Importing adds what's missing and never deletes anything.")
                 }
 
                 Section {
@@ -120,8 +120,8 @@ struct SettingsView: View {
             defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
             let summary = try Backup.decode(Data(contentsOf: url)).merge(into: context)
             onImported()
-            backupMessage = "Imported \(summary.wordsAdded) new words, updated \(summary.wordsUpdated), "
-                + "and added \(summary.messagesAdded) messages."
+            backupMessage = "Imported \(summary.wordsAdded) new words (updated \(summary.wordsUpdated)), "
+                + "\(summary.grammarAdded) grammar patterns and \(summary.messagesAdded) messages."
         } catch {
             backupMessage = "Couldn't import: \(error.localizedDescription)"
         }

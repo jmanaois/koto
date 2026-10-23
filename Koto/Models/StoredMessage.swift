@@ -18,6 +18,7 @@ final class StoredMessage {
     var vocabData: Data
     var practicedData = Data()
     var explanationData: Data?
+    var grammarData: Data?
 
     init(_ message: ChatMessage, mode: ChatMode) {
         id = message.id
@@ -39,6 +40,7 @@ final class StoredMessage {
         vocabData = (try? JSONEncoder().encode(message.vocab)) ?? Data()
         practicedData = (try? JSONEncoder().encode(message.practicedWords)) ?? Data()
         explanationData = message.explanation.flatMap { try? JSONEncoder().encode($0) }
+        grammarData = message.grammar.flatMap { try? JSONEncoder().encode($0) }
     }
 
     var chatMessage: ChatMessage {
@@ -50,6 +52,7 @@ final class StoredMessage {
             date: date,
             corrections: (try? JSONDecoder().decode([Correction].self, from: correctionsData)) ?? [],
             vocab: (try? JSONDecoder().decode([VocabItem].self, from: vocabData)) ?? [],
+            grammar: grammarData.flatMap { try? JSONDecoder().decode(GrammarPoint.self, from: $0) },
             isRead: isRead,
             practicedWords: (try? JSONDecoder().decode([String].self, from: practicedData)) ?? [],
             explanation: explanationData.flatMap { try? JSONDecoder().decode(MessageExplanation.self, from: $0) }

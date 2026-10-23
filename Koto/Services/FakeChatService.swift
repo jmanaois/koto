@@ -5,14 +5,14 @@ import Foundation
 /// generic casual reaction.
 struct FakeChatService: ChatService {
     func reply(
-        to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode, strictness: CorrectionStrictness
+        to history: [ChatMessage], study: StudyContext, mode: ChatMode, strictness: CorrectionStrictness
     ) async throws -> BotResponse {
         // Pretend to think, like a real network call would.
         try await Task.sleep(for: .milliseconds(Int.random(in: 700...1400)))
 
         let text = history.last(where: { $0.sender == .user })?.text ?? ""
         let (reply, vocab) = Self.reaction(to: text)
-        let practiced = practiceWords.map(\.word).filter { text.contains($0) }
+        let practiced = study.words.map(\.word).filter { text.contains($0) }
         return BotResponse(reply: reply, corrections: Self.corrections(for: text), newVocab: vocab, practicedWords: practiced)
     }
 
@@ -20,7 +20,8 @@ struct FakeChatService: ChatService {
         try await Task.sleep(for: .milliseconds(600))
         return MessageExplanation(
             translation: "(Sample translation; the real one comes from Claude.)",
-            breakdown: [MessageExplanation.Part(phrase: text, explanation: "Sample explanation.")]
+            breakdown: [MessageExplanation.Part(phrase: text, explanation: "Sample explanation.")],
+            structure: [MessageExplanation.Chunk(text: text, role: .other)]
         )
     }
 

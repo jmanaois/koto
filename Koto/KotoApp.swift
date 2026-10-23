@@ -8,7 +8,7 @@ struct KotoApp: App {
 
     init() {
         do {
-            container = try ModelContainer(for: SavedWord.self, StoredMessage.self)
+            container = try ModelContainer(for: SavedWord.self, SavedGrammar.self, MistakeRecord.self, StoredMessage.self)
         } catch {
             fatalError("Couldn't open the on-device database: \(error)")
         }

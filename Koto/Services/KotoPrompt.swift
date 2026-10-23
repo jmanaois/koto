@@ -86,6 +86,10 @@ nonisolated enum KotoPrompt {
     - "original": the exact problematic part, copied from their message.
     - "suggested": the natural version for this conversation, or null if there is no single rewrite.
     - "explanation": one or two short, friendly sentences in plain English saying why.
+    - "grammar_point": the grammar point the mistake is about, as a short common name a Genki learner would \
+    recognize, e.g. "は vs が", "particle に vs で", "て-form", "past tense", "〜たい", "adjective conjugation", \
+    "casual contractions". Use the same name every time for the same point. null if it's only word choice or \
+    spelling.
     How many corrections to make depends on "How strict to be" below.
 
     # New vocabulary ("new_vocab")
@@ -102,6 +106,29 @@ nonisolated enum KotoPrompt {
     In "practiced_words", list each practice word that the user's latest message uses correctly: the right \
     meaning, used naturally (conjugated forms count). Copy each word exactly as it appears in the practice \
     list. Leave it empty if there is no list or the user didn't use any of them correctly.
+
+    # Grammar point ("grammar")
+    The user finished the Genki textbooks, so they know textbook grammar but not how it sounds in casual speech. \
+    If YOUR reply uses a grammar pattern worth learning, describe one of them; otherwise use null. Good choices: \
+    casual contractions of textbook grammar (〜ちゃう from 〜てしまう, 〜てる from 〜ている, 〜なきゃ from 〜なければ), \
+    casual sentence endings (〜じゃん, 〜っけ, 〜かな), and common N4–N3 patterns (〜っぽい, 〜ばよかった, 〜し). \
+    Skip basics a Genki graduate knows, and skip patterns in the user's practice grammar.
+    - "pattern": the pattern with 〜 for what it attaches to, e.g. "〜ちゃう".
+    - "meaning": a short English meaning, e.g. "to end up doing / do completely (casual)".
+    - "base": the textbook form it comes from, e.g. "〜てしまう", or null if it isn't a casual version of one.
+    - "note": one or two sentences on how it's formed and when it's used.
+    - "examples": two short casual example sentences, each with "japanese" and "english".
+
+    # Practice grammar
+    Some user messages end with a <practice_grammar> list: grammar patterns the user is reviewing. When it fits \
+    naturally, use one in your reply or ask something that invites the user to use it. Never mention the list. \
+    In "practiced_grammar", list each practice pattern the user's latest message uses correctly, copied exactly \
+    as it appears in the list. Leave it empty otherwise.
+
+    # Weak points
+    Some user messages end with a <weak_points> list: grammar points the user often gets wrong. Now and then, \
+    steer the conversation so they get a natural chance to use one (for example, a question whose answer needs \
+    the て-form). Never mention the list, and don't turn the chat into a quiz.
     """
 
     /// What counts as the right politeness level in each mode.
@@ -144,8 +171,9 @@ nonisolated enum KotoPrompt {
                             "suggested": ["anyOf": [["type": "string"], ["type": "null"]]],
                             "type": ["type": "string", "enum": ["grammar", "naturalness", "register"]],
                             "explanation": ["type": "string"],
+                            "grammar_point": ["anyOf": [["type": "string"], ["type": "null"]]],
                         ],
-                        "required": ["original", "suggested", "type", "explanation"],
+                        "required": ["original", "suggested", "type", "explanation", "grammar_point"],
                         "additionalProperties": false,
                     ],
                 ],
@@ -163,8 +191,36 @@ nonisolated enum KotoPrompt {
                     ],
                 ],
                 "practiced_words": ["type": "array", "items": ["type": "string"]],
+                "grammar": ["anyOf": [grammarSchema, ["type": "null"]]],
+                "practiced_grammar": ["type": "array", "items": ["type": "string"]],
             ],
-            "required": ["reply", "corrections", "new_vocab", "practiced_words"],
+            "required": ["reply", "corrections", "new_vocab", "practiced_words", "grammar", "practiced_grammar"],
+            "additionalProperties": false,
+        ]
+    }
+
+    private static var grammarSchema: [String: Any] {
+        [
+            "type": "object",
+            "properties": [
+                "pattern": ["type": "string"],
+                "meaning": ["type": "string"],
+                "base": ["anyOf": [["type": "string"], ["type": "null"]]],
+                "note": ["type": "string"],
+                "examples": [
+                    "type": "array",
+                    "items": [
+                        "type": "object",
+                        "properties": [
+                            "japanese": ["type": "string"],
+                            "english": ["type": "string"],
+                        ],
+                        "required": ["japanese", "english"],
+                        "additionalProperties": false,
+                    ],
+                ],
+            ],
+            "required": ["pattern", "meaning", "base", "note", "examples"],
             "additionalProperties": false,
         ]
     }
@@ -182,6 +238,17 @@ nonisolated enum KotoPrompt {
     "explanation" is a short plain-English note: what it means and, where useful, the dictionary form, the \
     grammar, or the casual nuance (for example "〜てる = casual 〜ている, ongoing action"). Skip punctuation \
     and emoji, and keep the whole breakdown to at most eight chunks by grouping very simple parts.
+    - "structure": the whole message split, in order and covering every character, into the small parts of \
+    its sentence structure, each with the job it does. A part is ONE noun phrase with its particle, ONE verb \
+    or adjective with its conjugation, or ONE sentence ending. Never put a whole clause in one part: a clause \
+    like "どの映画見たの？" is three parts. For example "え、映画いいじゃん！どの映画見たの？" is: "え、" other, \
+    "映画" topic (dropped は), "いい" verb, "じゃん！" ending, "どの" description, "映画" object (dropped を), \
+    "見た" verb, "の？" ending. Another: "今日は" topic, "友達と" target, "映画を" object, "見に行った" verb. Roles: "topic" (marked \
+    with は, or a dropped-は topic), "subject" (が), "object" (を), "time", "place" (where or how, often で), \
+    "target" (に, へ, と: who/where to, with whom), "verb" (the verb or predicate, including adjectives and \
+    だ used as the predicate), "description" (a word describing a noun), "ending" (sentence-ending particles \
+    like よ, ね, じゃん, の？), "connector" (から, けど, し, conjunctions), "other" (punctuation, emoji, \
+    interjections like え, へぇ). Japanese often drops the subject; don't invent chunks that aren't written.
     """
 
     static var explanationSchema: [String: Any] {
@@ -201,8 +268,23 @@ nonisolated enum KotoPrompt {
                         "additionalProperties": false,
                     ],
                 ],
+                "structure": [
+                    "type": "array",
+                    "items": [
+                        "type": "object",
+                        "properties": [
+                            "text": ["type": "string"],
+                            "role": [
+                                "type": "string",
+                                "enum": MessageExplanation.Chunk.Role.allCases.map(\.rawValue),
+                            ],
+                        ],
+                        "required": ["text", "role"],
+                        "additionalProperties": false,
+                    ],
+                ],
             ],
-            "required": ["translation", "breakdown"],
+            "required": ["translation", "breakdown", "structure"],
             "additionalProperties": false,
         ]
     }
@@ -210,5 +292,14 @@ nonisolated enum KotoPrompt {
     static func practiceWordsBlock(_ words: [VocabItem]) -> String {
         let lines = words.map { "\($0.word) (\($0.reading)): \($0.meaning)" }
         return "<practice_words>\n" + lines.joined(separator: "\n") + "\n</practice_words>"
+    }
+
+    static func practiceGrammarBlock(_ patterns: [GrammarPoint]) -> String {
+        let lines = patterns.map { "\($0.pattern): \($0.meaning)" }
+        return "<practice_grammar>\n" + lines.joined(separator: "\n") + "\n</practice_grammar>"
+    }
+
+    static func weakPointsBlock(_ points: [String]) -> String {
+        "<weak_points>\n" + points.joined(separator: "\n") + "\n</weak_points>"
     }
 }

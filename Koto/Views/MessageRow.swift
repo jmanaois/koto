@@ -6,6 +6,7 @@ struct MessageRow: View {
     /// Name and avatar for a bot message's speaker.
     let persona: Persona
     let onVocabTap: (VocabItem) -> Void
+    let onGrammarTap: (GrammarPoint) -> Void
     /// Called with the text starting at a tapped word, for dictionary lookup.
     let onWordTap: (String) -> Void
     /// Called with the text the user highlighted by pressing and dragging.
@@ -37,6 +38,9 @@ struct MessageRow: View {
                         TranslateButton(action: onTranslate)
                         ListenChip(text: message.text)
                         VocabChips(items: message.vocab, onTap: onVocabTap)
+                        if let grammar = message.grammar {
+                            GrammarChip(point: grammar) { onGrammarTap(grammar) }
+                        }
                     }
                 }
             }
@@ -171,6 +175,34 @@ private struct ReviewedBadge: View {
             .padding(.vertical, 5)
             .background(.white.opacity(0.9), in: Capsule())
             .foregroundStyle(.green)
+    }
+}
+
+/// A grammar pattern こと used, e.g. 〜ちゃう; filled once it's in the grammar deck.
+private struct GrammarChip: View {
+    let point: GrammarPoint
+    let onTap: () -> Void
+
+    @Query private var saved: [SavedGrammar]
+
+    var body: some View {
+        let isSaved = saved.contains { $0.pattern == point.pattern }
+        Button(action: onTap) {
+            HStack(spacing: 4) {
+                Image(systemName: isSaved ? "puzzlepiece.extension.fill" : "puzzlepiece.extension")
+                    .foregroundStyle(isSaved ? .green : .purple)
+                Text(point.pattern)
+            }
+            .font(.caption)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.white.opacity(0.85), in: Capsule())
+            .foregroundStyle(.black)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Grammar: \(point.pattern)")
     }
 }
 

@@ -47,18 +47,21 @@ final class ChatViewModel {
         isBotTyping = true
 
         let history = messages.filter { !$0.isError }
-        let practiceWords = duePracticeWords()
+        let study = StudyContext(words: duePracticeWords(), grammar: duePracticeGrammar(), weakPoints: weakPoints())
         let mode = mode
         let strictness = AppSettings.strictness
         Task {
             defer { isBotTyping = false }
             do {
                 let response = try await service.reply(
-                    to: history, practiceWords: practiceWords, mode: mode, strictness: strictness
+                    to: history, study: study, mode: mode, strictness: strictness
                 )
+                // Mistakes are logged even if the user switched chats while waiting.
+                logMistakes(response.corrections)
                 // The user may have switched modes while waiting; this reply belongs to the old chat.
                 guard mode == self.mode else { return }
-                let reviewed = reviewPracticedWords(response.practicedWords, offered: practiceWords)
+                let reviewed = reviewPracticedWords(response.practicedWords, offered: study.words)
+                    + reviewPracticedGrammar(response.practicedGrammar, offered: study.grammar)
                 update(at: userIndex) {
                     $0.corrections = response.corrections
                     $0.practicedWords = reviewed
@@ -66,9 +69,13 @@ final class ChatViewModel {
                 }
                 let parts = Self.splitReply(response.reply, for: mode)
                 for (index, part) in parts.enumerated() {
-                    // New vocab goes under the last message of the reply.
-                    let vocab = index == parts.count - 1 ? response.newVocab : []
-                    append(ChatMessage(sender: .bot, text: part.text, speaker: part.speaker, vocab: vocab))
+                    // New vocab and grammar go under the last message of the reply.
+                    let isLast = index == parts.count - 1
+                    append(ChatMessage(
+                        sender: .bot, text: part.text, speaker: part.speaker,
+                        vocab: isLast ? response.newVocab : [],
+                        grammar: isLast ? response.grammar : nil
+                    ))
                 }
             } catch {
                 guard mode == self.mode else { return }
@@ -113,6 +120,50 @@ final class ChatViewModel {
         descriptor.fetchLimit = limit
         let words = (try? context.fetch(descriptor)) ?? []
         return words.map { VocabItem(word: $0.word, reading: $0.reading, meaning: $0.meaning) }
+    }
+
+    /// The most overdue grammar patterns, for the bot to work into its reply.
+    private func duePracticeGrammar(limit: Int = 2) -> [GrammarPoint] {
+        let now = Date.now
+        var descriptor = FetchDescriptor<SavedGrammar>(
+            predicate: #Predicate { $0.dueAt <= now },
+            sortBy: [SortDescriptor(\.dueAt)]
+        )
+        descriptor.fetchLimit = limit
+        return ((try? context.fetch(descriptor)) ?? []).map(\.grammarPoint)
+    }
+
+    /// The grammar points corrected most in the last 30 days.
+    private func weakPoints(limit: Int = 3) -> [String] {
+        let monthAgo = Date.now.addingTimeInterval(-30 * 86_400)
+        let descriptor = FetchDescriptor<MistakeRecord>(predicate: #Predicate { $0.date >= monthAgo })
+        let records = (try? context.fetch(descriptor)) ?? []
+        let counts = Dictionary(grouping: records, by: \.point).mapValues(\.count)
+        return counts.sorted { $0.value > $1.value }.prefix(limit).map(\.key)
+    }
+
+    /// Keeps grammar mistakes in their own log, so the Mistakes screen survives clearing a chat.
+    private func logMistakes(_ corrections: [Correction]) {
+        for correction in corrections {
+            guard let point = correction.grammarPoint?.trimmingCharacters(in: .whitespaces), !point.isEmpty else { continue }
+            context.insert(MistakeRecord(point: point, correction: correction))
+        }
+        save()
+    }
+
+    /// Using a due grammar pattern correctly in chat counts as remembering it (rated Good).
+    private func reviewPracticedGrammar(_ used: [String], offered: [GrammarPoint]) -> [String] {
+        let patterns = used.filter(Set(offered.map(\.pattern)).contains)
+        guard !patterns.isEmpty else { return [] }
+
+        let now = Date.now
+        let descriptor = FetchDescriptor<SavedGrammar>(predicate: #Predicate { patterns.contains($0.pattern) && $0.dueAt <= now })
+        let saved = (try? context.fetch(descriptor)) ?? []
+        for grammar in saved {
+            grammar.review(.good)
+        }
+        save()
+        return saved.map(\.pattern)
     }
 
     /// Using a due word correctly in chat counts as remembering it (rated Good).

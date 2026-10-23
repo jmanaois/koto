@@ -40,10 +40,10 @@ struct ClaudeChatService: ChatService {
     }
 
     func reply(
-        to history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode, strictness: CorrectionStrictness
+        to history: [ChatMessage], study: StudyContext, mode: ChatMode, strictness: CorrectionStrictness
     ) async throws -> BotResponse {
         // Like translations, the model now and then sends "reply": "". Ask once more before giving up.
-        let body = Self.body(history: history, practiceWords: practiceWords, mode: mode, strictness: strictness)
+        let body = Self.body(history: history, study: study, mode: mode, strictness: strictness)
         for _ in 0..<2 {
             let response: BotResponse = try await send(body)
             if !response.reply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return response }
@@ -109,14 +109,18 @@ struct ClaudeChatService: ChatService {
     // MARK: - Request
 
     private static func body(
-        history: [ChatMessage], practiceWords: [VocabItem], mode: ChatMode, strictness: CorrectionStrictness
+        history: [ChatMessage], study: StudyContext, mode: ChatMode, strictness: CorrectionStrictness
     ) -> [String: Any] {
         var messages = apiMessages(from: history)
-        if !practiceWords.isEmpty, var last = messages.last, last["role"] as? String == "user" {
-            // Practice words ride along with the newest user turn only, so earlier turns
+        var blocks: [String] = []
+        if !study.words.isEmpty { blocks.append(KotoPrompt.practiceWordsBlock(study.words)) }
+        if !study.grammar.isEmpty { blocks.append(KotoPrompt.practiceGrammarBlock(study.grammar)) }
+        if !study.weakPoints.isEmpty { blocks.append(KotoPrompt.weakPointsBlock(study.weakPoints)) }
+        if !blocks.isEmpty, var last = messages.last, last["role"] as? String == "user" {
+            // Study lists ride along with the newest user turn only, so earlier turns
             // stay identical between requests and the cached prefix keeps matching.
             var content = last["content"] as? [[String: Any]] ?? []
-            content.append(["type": "text", "text": KotoPrompt.practiceWordsBlock(practiceWords)])
+            content.append(["type": "text", "text": blocks.joined(separator: "\n")])
             last["content"] = content
             messages[messages.count - 1] = last
         }

@@ -24,18 +24,40 @@ nonisolated struct Backup: Codable {
         var isRead: Bool
         var correctionsData, vocabData, practicedData: Data
         var explanationData: Data?
+        var grammarData: Data?
+    }
+
+    struct Grammar: Codable {
+        var pattern, meaning, note: String
+        var base: String?
+        var examplesData: Data
+        var addedAt, dueAt: Date
+        var stability, difficulty: Double
+        var lastReviewedAt: Date?
+        var reviewCount, lapses: Int
+        var exampleSentence, exampleTranslation: String?
+    }
+
+    struct Mistake: Codable {
+        var point, original, explanation: String
+        var suggested: String?
+        var date: Date
     }
 
     var version = 1
     var exportedAt = Date()
     var words: [Word]
     var messages: [Message]
+    // Added after the first version; missing in older backup files.
+    var grammar: [Grammar]?
+    var mistakes: [Mistake]?
 
     /// What an import added or changed, for the confirmation message.
     struct ImportSummary {
         var wordsAdded = 0
         var wordsUpdated = 0
         var messagesAdded = 0
+        var grammarAdded = 0
     }
 
     enum ImportError: LocalizedError {
@@ -68,7 +90,23 @@ extension Backup {
                 id: message.id, isFromUser: message.isFromUser, text: message.text,
                 speaker: message.speaker, mode: message.mode, date: message.date, isRead: message.isRead,
                 correctionsData: message.correctionsData, vocabData: message.vocabData,
-                practicedData: message.practicedData, explanationData: message.explanationData
+                practicedData: message.practicedData, explanationData: message.explanationData,
+                grammarData: message.grammarData
+            )
+        }
+        grammar = try context.fetch(FetchDescriptor<SavedGrammar>()).map { item in
+            Grammar(
+                pattern: item.pattern, meaning: item.meaning, note: item.note, base: item.base,
+                examplesData: item.examplesData, addedAt: item.addedAt, dueAt: item.dueAt,
+                stability: item.stability, difficulty: item.difficulty, lastReviewedAt: item.lastReviewedAt,
+                reviewCount: item.reviewCount, lapses: item.lapses,
+                exampleSentence: item.exampleSentence, exampleTranslation: item.exampleTranslation
+            )
+        }
+        mistakes = try context.fetch(FetchDescriptor<MistakeRecord>()).map { record in
+            Mistake(
+                point: record.point, original: record.original, explanation: record.explanation,
+                suggested: record.suggested, date: record.date
             )
         }
     }
@@ -129,8 +167,43 @@ extension Backup {
             message.vocabData = record.vocabData
             message.practicedData = record.practicedData
             message.explanationData = record.explanationData
+            message.grammarData = record.grammarData
             context.insert(message)
             summary.messagesAdded += 1
+        }
+
+        let existingGrammar = Dictionary(
+            try context.fetch(FetchDescriptor<SavedGrammar>()).map { ($0.pattern, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        for record in grammar ?? [] {
+            let point = GrammarPoint(pattern: record.pattern, meaning: record.meaning, base: record.base, note: record.note, examples: [])
+            let target: SavedGrammar
+            if let existing = existingGrammar[record.pattern] {
+                guard record.reviewCount > existing.reviewCount else { continue }
+                target = existing
+            } else {
+                target = SavedGrammar(point)
+                context.insert(target)
+                summary.grammarAdded += 1
+            }
+            target.examplesData = record.examplesData
+            target.addedAt = record.addedAt
+            target.dueAt = record.dueAt
+            target.stability = record.stability
+            target.difficulty = record.difficulty
+            target.lastReviewedAt = record.lastReviewedAt
+            target.reviewCount = record.reviewCount
+            target.lapses = record.lapses
+            target.exampleSentence = record.exampleSentence ?? target.exampleSentence
+            target.exampleTranslation = record.exampleTranslation ?? target.exampleTranslation
+        }
+
+        // Mistakes have no id; skip ones already logged at the same moment for the same text.
+        let existingMistakes = Set(try context.fetch(FetchDescriptor<MistakeRecord>()).map { "\($0.date.timeIntervalSince1970)|\($0.original)" })
+        for record in mistakes ?? [] where !existingMistakes.contains("\(record.date.timeIntervalSince1970)|\(record.original)") {
+            let correction = Correction(original: record.original, suggested: record.suggested, type: .grammar, explanation: record.explanation)
+            context.insert(MistakeRecord(point: record.point, correction: correction, date: record.date))
         }
 
         try context.save()

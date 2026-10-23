@@ -4,6 +4,7 @@ import SwiftUI
 struct ChatView: View {
     @Bindable var model: ChatViewModel
     @State private var selectedVocab: VocabSelection?
+    @State private var selectedGrammar: GrammarSelection?
     @State private var wordLookup: WordLookup?
     @State private var translating: TranslationTarget?
     @State private var showingSettings = false
@@ -28,6 +29,7 @@ struct ChatView: View {
                                 message: message,
                                 persona: model.mode.persona(for: message.speaker),
                                 onVocabTap: { selectedVocab = VocabSelection(item: $0, message: message) },
+                                onGrammarTap: { selectedGrammar = GrammarSelection(point: $0, message: message) },
                                 onWordTap: { wordLookup = WordLookup(text: $0, in: message) },
                                 onSelect: { wordLookup = WordLookup(text: $0, in: message, isSelection: true) },
                                 onTranslate: { translating = TranslationTarget(id: message.id) }
@@ -71,7 +73,7 @@ struct ChatView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
-                        VocabDeckView()
+                        StudyView()
                     } label: {
                         Label("My words", systemImage: "book")
                     }
@@ -94,6 +96,10 @@ struct ChatView: View {
             .sheet(item: $selectedVocab) { selection in
                 VocabDetailSheet(item: selection.item, example: selection.example)
                     .presentationDetents([.height(260)])
+            }
+            .sheet(item: $selectedGrammar) { selection in
+                GrammarDetailSheet(point: selection.point, example: selection.example)
+                    .presentationDetents([.medium, .large])
             }
             .sheet(item: $wordLookup) { lookup in
                 WordLookupSheet(lookup: lookup)
@@ -153,6 +159,18 @@ private struct VocabSelection: Identifiable {
     }
 }
 
+/// A grammar chip tapped under a bot message, with the sentence it came from.
+private struct GrammarSelection: Identifiable {
+    let point: GrammarPoint
+    let example: ExampleSentence?
+    var id: String { point.id }
+
+    init(point: GrammarPoint, message: ChatMessage) {
+        self.point = point
+        example = ExampleSentence(from: message, containing: point.pattern.replacingOccurrences(of: "〜", with: ""))
+    }
+}
+
 /// The bot message whose translation sheet is open.
 private struct TranslationTarget: Identifiable {
     let id: UUID
@@ -182,7 +200,7 @@ private struct DatePill: View {
 
 #Preview {
     let container = try! ModelContainer(
-        for: SavedWord.self, StoredMessage.self,
+        for: SavedWord.self, SavedGrammar.self, MistakeRecord.self, StoredMessage.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     ChatView(model: ChatViewModel(context: container.mainContext, service: FakeChatService()))

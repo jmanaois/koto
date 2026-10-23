@@ -1,13 +1,13 @@
 import SwiftData
 import SwiftUI
 
-/// Flashcard review of due words. Shows the word, then reading and meaning,
-/// and the user rates how well they remembered it.
-struct ReviewView: View {
-    @Query private var words: [SavedWord]
+/// Flashcard review of due cards (saved words or grammar). Shows the front, then the
+/// reading and meaning, and the user rates how well they remembered it.
+struct ReviewView<Card: ReviewCard>: View {
+    @Query private var words: [Card]
 
-    /// Snapshot of due words taken when the session starts. Words rated Again go to the back.
-    @State private var queue: [SavedWord] = []
+    /// Snapshot of due cards taken when the session starts. Cards rated Again go to the back.
+    @State private var queue: [Card] = []
     @State private var hasStarted = false
     @State private var isShowingAnswer = false
     @State private var reviewedCount = 0
@@ -32,33 +32,41 @@ struct ReviewView: View {
         }
     }
 
-    private func cardView(_ card: SavedWord) -> some View {
+    private func cardView(_ card: Card) -> some View {
         VStack(spacing: 20) {
             Text("\(queue.count) left")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             VStack(spacing: 12) {
-                Text(card.word)
+                Text(card.cardFront)
                     .font(.system(size: 44, weight: .bold))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
                 if isShowingAnswer {
-                    SpeakButton(text: card.reading)
+                    SpeakButton(text: card.cardSpeech)
                     Divider()
-                    if card.reading != card.word {
-                        Text(card.reading)
+                    if let reading = card.cardReading {
+                        Text(reading)
                             .font(.title2)
                             .foregroundStyle(.secondary)
                     }
-                    Text(card.meaning)
+                    Text(card.cardMeaning)
                         .font(.title3)
                         .multilineTextAlignment(.center)
-                    if let sentence = card.exampleSentence {
+                    if let note = card.cardNote {
+                        Text(note)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    if let sentence = card.cardExample {
                         VStack(spacing: 4) {
                             HStack(alignment: .center, spacing: 8) {
-                                FuriganaText(sentence, highlighting: card.word, onWordTap: { _ in })
+                                FuriganaText(sentence, highlighting: card.cardHighlight, onWordTap: { _ in })
                                 SpeakButton(text: sentence, font: .body)
                             }
-                            if let translation = card.exampleTranslation {
+                            if let translation = card.cardExampleTranslation {
                                 Text(translation)
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -123,7 +131,7 @@ struct ReviewView: View {
         }
     }
 
-    private func rate(_ card: SavedWord, _ rating: FSRS.Rating) {
+    private func rate(_ card: Card, _ rating: FSRS.Rating) {
         card.review(rating)
         reviewedCount += 1
         withAnimation(.snappy) {
