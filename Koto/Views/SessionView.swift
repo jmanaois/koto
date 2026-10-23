@@ -22,7 +22,6 @@ struct SessionView: View {
                 }
                 .accessibilityLabel("Close")
                 ProgressView(value: session.progress)
-                    .tint(.green)
                     .animation(.snappy, value: session.progress)
             }
             .padding()
@@ -90,7 +89,6 @@ struct SessionView: View {
                 .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.green)
             .disabled(step.exercise != nil && (pending == nil || session.isChecking))
             .padding()
             .background(.bar)
@@ -163,6 +161,7 @@ private struct Prompt: View {
 
 /// Fill in the blank from three options.
 private struct ChoiceExercise: View {
+    @Environment(\.theme) private var theme
     let sentence: String
     let english: String
     let options: [String]
@@ -220,7 +219,7 @@ private struct ChoiceExercise: View {
             if option == picked { return .red }
             return Color(.separator)
         }
-        return option == picked ? .accentColor : Color(.separator)
+        return option == picked ? theme.accent : Color(.separator)
     }
 
     private func background(_ option: String) -> Color {
@@ -454,7 +453,6 @@ private struct SessionSummary: View {
                     .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.green)
             .padding()
         }
     }

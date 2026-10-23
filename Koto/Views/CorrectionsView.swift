@@ -35,6 +35,7 @@ struct CorrectionsView: View {
 }
 
 private struct CorrectionCard: View {
+    @Environment(\.theme) private var theme
     let correction: Correction
 
     var body: some View {
@@ -63,7 +64,7 @@ private struct CorrectionCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.botBubble, in: RoundedRectangle(cornerRadius: 12))
+        .background(theme.botBubble, in: RoundedRectangle(cornerRadius: 12))
         .overlay(alignment: .leading) {
             UnevenRoundedRectangle(topLeadingRadius: 12, bottomLeadingRadius: 12)
                 .fill(tint)

@@ -11,6 +11,7 @@ struct ChatView: View {
     @State private var confirmingClear = false
     @Query private var savedWords: [SavedWord]
     @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
+    @Environment(\.theme) private var theme
 
     private var knownWords: Set<String> {
         fadeKnownFurigana ? Set(savedWords.filter(\.isKnownWell).map(\.word)) : []
@@ -56,7 +57,7 @@ struct ChatView: View {
                     }
                 }
             }
-            .background(Theme.chatBackground)
+            .background(theme.chatBackground)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 InputBar(text: $model.draft, canSend: model.canSend) { model.send() }
                     .background(.bar)

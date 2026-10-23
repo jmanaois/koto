@@ -6,6 +6,7 @@ nonisolated enum AppSettings {
     static let furiganaKey = "showFurigana"
     static let fadeKnownFuriganaKey = "fadeKnownFurigana"
     static let slowSpeechKey = "slowSpeech"
+    static let themeKey = "theme"
     static let reminderKey = "dailyLessonReminder"
     /// Minutes after midnight.
     static let reminderMinutesKey = "dailyLessonReminderMinutes"

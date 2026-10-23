@@ -54,7 +54,7 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
         case (.senpai, _): Persona(name: "こと先輩", initial: "こ", color: 0xE9963E)
         case (.online, _): Persona(name: "koto_", initial: "こ", color: 0x6C63FF)
         case (.drill, _): Persona(name: "こと先生", initial: "先", color: 0xE5484D)
-        default: Persona(name: "こと", initial: "こ", color: 0x2BB673)
+        default: Persona(name: "こと", initial: "こ", color: nil)
         }
     }
 
@@ -88,5 +88,6 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
 nonisolated struct Persona: Hashable {
     let name: String
     let initial: String
-    let color: UInt32
+    /// nil uses the theme's accent color.
+    let color: UInt32?
 }

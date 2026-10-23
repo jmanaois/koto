@@ -76,6 +76,7 @@ struct WordLookupSheet: View {
 }
 
 private struct EntryRow: View {
+    @Environment(\.theme) private var theme
     let entry: DictionaryEntry
 
     var body: some View {
@@ -101,7 +102,7 @@ private struct EntryRow: View {
                             .font(.caption.weight(.medium))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.accentColor.opacity(0.15), in: Capsule())
+                            .background(theme.accent.opacity(0.15), in: Capsule())
                     }
                 }
             }

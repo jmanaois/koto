@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct MessageRow: View {
+    @Environment(\.theme) private var theme
     let message: ChatMessage
     /// Name and avatar for a bot message's speaker.
     let persona: Persona
@@ -27,7 +28,7 @@ struct MessageRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(persona.name)
                     .font(.caption)
-                    .foregroundStyle(Theme.metaText)
+                    .foregroundStyle(theme.metaText)
                 HStack(alignment: .bottom, spacing: 4) {
                     Bubble(text: message.text, sender: .bot, onWordTap: onWordTap, onSelect: onSelect)
                     TimeLabel(date: message.date)
@@ -59,7 +60,7 @@ struct MessageRow: View {
                     TimeLabel(date: message.date)
                 }
                 .font(.caption2)
-                .foregroundStyle(Theme.metaText)
+                .foregroundStyle(theme.metaText)
                 Bubble(text: message.text, sender: .user, onWordTap: onWordTap, onSelect: onSelect)
             }
             if !message.practicedWords.isEmpty {
@@ -74,13 +75,14 @@ struct MessageRow: View {
 }
 
 private struct Bubble: View {
+    @Environment(\.theme) private var theme
     let text: String
     let sender: Sender
     let onWordTap: (String) -> Void
     let onSelect: (String) -> Void
 
     private var textColor: Color {
-        sender == .user ? Theme.userBubbleText : .primary
+        sender == .user ? theme.userBubbleText : .primary
     }
 
     var body: some View {
@@ -90,7 +92,7 @@ private struct Bubble: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
-                sender == .user ? Theme.userBubble : Theme.botBubble,
+                sender == .user ? theme.userBubble : theme.botBubble,
                 // The sharp corner points toward the speaker, like LINE's bubble tail.
                 in: UnevenRoundedRectangle(
                     topLeadingRadius: sender == .bot ? 4 : 18,
@@ -103,16 +105,18 @@ private struct Bubble: View {
 }
 
 private struct TimeLabel: View {
+    @Environment(\.theme) private var theme
     let date: Date
 
     var body: some View {
         Text(date, format: .dateTime.hour().minute())
             .font(.caption2)
-            .foregroundStyle(Theme.metaText)
+            .foregroundStyle(theme.metaText)
     }
 }
 
 struct BotAvatar: View {
+    @Environment(\.theme) private var theme
     let persona: Persona
 
     var body: some View {
@@ -120,7 +124,7 @@ struct BotAvatar: View {
             .font(.headline)
             .foregroundStyle(.white)
             .frame(width: 36, height: 36)
-            .background(Color(light: persona.color, dark: persona.color), in: Circle())
+            .background(persona.color.map { Color(light: $0, dark: $0) } ?? theme.accent, in: Circle())
     }
 }
 
@@ -239,6 +243,7 @@ private struct VocabChips: View {
 }
 
 struct TypingIndicatorRow: View {
+    @Environment(\.theme) private var theme
     let persona: Persona
 
     var body: some View {
@@ -250,7 +255,7 @@ struct TypingIndicatorRow: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(Theme.botBubble, in: UnevenRoundedRectangle(
+                .background(theme.botBubble, in: UnevenRoundedRectangle(
                     topLeadingRadius: 4, bottomLeadingRadius: 18, bottomTrailingRadius: 18, topTrailingRadius: 18
                 ))
                 .padding(.top, 18)

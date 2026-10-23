@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
     @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
     @AppStorage(AppSettings.slowSpeechKey) private var slowSpeech = true
+    @AppStorage(AppSettings.themeKey) private var theme = Theme.classic
     @AppStorage(AppSettings.reminderKey) private var reminder = false
     @AppStorage(AppSettings.reminderMinutesKey) private var reminderMinutes = AppSettings.defaultReminderMinutes
     @Environment(\.dismiss) private var dismiss
@@ -39,6 +40,22 @@ struct SettingsView: View {
                     Text("Corrections")
                 } footer: {
                     Text("Applies to your next message, in every chat mode.")
+                }
+
+                Section {
+                    Picker("Theme", selection: $theme) {
+                        ForEach(Theme.allCases) { option in
+                            HStack(spacing: 12) {
+                                ThemeSwatch(theme: option)
+                                Text(option.label)
+                            }
+                            .tag(option)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } header: {
+                    Text("Theme")
                 }
 
                 Section {
@@ -158,6 +175,22 @@ struct SettingsView: View {
         } catch {
             backupMessage = "Couldn't import: \(error.localizedDescription)"
         }
+    }
+}
+
+/// The chat background with both bubbles, as a small preview of a theme.
+private struct ThemeSwatch: View {
+    let theme: Theme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Capsule().fill(theme.botBubble).frame(width: 18, height: 7)
+            Capsule().fill(theme.userBubble).frame(width: 18, height: 7)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(5)
+        .frame(width: 40, height: 30)
+        .background(theme.chatBackground, in: RoundedRectangle(cornerRadius: 7))
     }
 }
 

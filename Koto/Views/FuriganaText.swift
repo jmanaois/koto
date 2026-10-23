@@ -4,6 +4,7 @@ import SwiftUI
 /// Tapping a Japanese word calls `onWordTap` with the text to look up; pressing and
 /// dragging across words highlights them and calls `onSelect` with the highlighted text.
 struct FuriganaText: View {
+    @Environment(\.theme) private var theme
     let onWordTap: (String) -> Void
     var onSelect: ((String) -> Void)?
 
@@ -94,7 +95,7 @@ struct FuriganaText: View {
         )
         .background(
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.accentColor.opacity(isSelected ? 0.4 : 0))
+                .fill(theme.accent.opacity(isSelected ? 0.4 : 0))
         )
         .contentShape(Rectangle())
         .onTapGesture {

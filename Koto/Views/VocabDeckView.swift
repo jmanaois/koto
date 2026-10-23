@@ -80,6 +80,7 @@ struct VocabDeckView: View {
 
 /// "Due", "Known", or when the card is next due.
 struct DueLabel: View {
+    @Environment(\.theme) private var theme
     let dueAt: Date
     var isKnown = false
 
@@ -94,7 +95,7 @@ struct DueLabel: View {
                 .foregroundStyle(.green)
             } else if dueAt <= .now {
                 Text("Due")
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(theme.accent)
             } else {
                 Text(dueAt, format: .relative(presentation: .numeric))
                     .foregroundStyle(.secondary)
@@ -106,6 +107,7 @@ struct DueLabel: View {
 
 /// The Review row at the top of a deck.
 struct ReviewRow<Card: ReviewCard>: View {
+    @Environment(\.theme) private var theme
     let dueCount: Int
 
     var body: some View {
@@ -116,7 +118,7 @@ struct ReviewRow<Card: ReviewCard>: View {
                 Label("Review", systemImage: "rectangle.stack")
                 Spacer()
                 Text(dueCount == 0 ? "All caught up" : "\(dueCount) due")
-                    .foregroundStyle(dueCount == 0 ? Color.secondary : Color.accentColor)
+                    .foregroundStyle(dueCount == 0 ? Color.secondary : theme.accent)
             }
         }
     }

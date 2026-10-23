@@ -7,6 +7,7 @@ struct KotoApp: App {
     private let service: ChatService = ClaudeChatService()
     @State private var chat: ChatViewModel
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage(AppSettings.themeKey) private var theme = Theme.classic
 
     init() {
         do {
@@ -30,6 +31,8 @@ struct KotoApp: App {
                     CourseView(service: service)
                 }
             }
+            .environment(\.theme, theme)
+            .tint(theme.accent)
         }
         .modelContainer(container)
         .onChange(of: scenePhase) {

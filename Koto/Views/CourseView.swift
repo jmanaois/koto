@@ -146,7 +146,6 @@ private struct TodayCard: View {
                     .padding(.vertical, 6)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.green)
             }
         }
         .padding()
@@ -209,7 +208,6 @@ private struct LessonDetailView: View {
                     .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.green)
             .padding()
             .background(.bar)
         }
@@ -220,6 +218,7 @@ private struct LessonDetailView: View {
 
 /// What a grammar point means, how it's built, notes and examples.
 struct LessonIntroCard: View {
+    @Environment(\.theme) private var theme
     let lesson: CourseLesson
 
     var body: some View {
@@ -241,7 +240,7 @@ struct LessonIntroCard: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+            .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
 
             Text(lesson.point.note)
                 .font(.body)
