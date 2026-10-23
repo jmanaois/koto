@@ -32,7 +32,8 @@ struct MessageRow: View {
                     TimeLabel(date: message.date)
                 }
                 if !message.isError {
-                    HStack(spacing: 6) {
+                    // Chips wrap to a second row as whole chips instead of squeezing.
+                    FlowLayout(spacing: 6, lineSpacing: 6) {
                         TranslateButton(action: onTranslate)
                         ListenChip(text: message.text)
                         VocabChips(items: message.vocab, onTap: onVocabTap)
@@ -181,8 +182,7 @@ private struct VocabChips: View {
 
     var body: some View {
         let saved = Set(savedWords.map(\.word))
-        HStack(spacing: 6) {
-            ForEach(items) { item in
+        ForEach(items) { item in
                 let isSaved = saved.contains(item.word)
                 Button {
                     onTap(item)
@@ -196,11 +196,12 @@ private struct VocabChips: View {
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
+                        .lineLimit(1)
+                        .fixedSize()
                         .background(.white.opacity(0.85), in: Capsule())
                         .foregroundStyle(.black)
                 }
                 .buttonStyle(.plain)
-            }
         }
     }
 }

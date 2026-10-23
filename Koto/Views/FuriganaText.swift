@@ -159,10 +159,15 @@ private struct TokenView: View {
 }
 
 /// Places subviews left to right, wrapping to a new line when the width runs out.
-private struct FlowLayout: Layout {
+/// Used for the words of a message and for the chip row under it.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 0
+    var lineSpacing: CGFloat = 0
+
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let rows = arrange(subviews, maxWidth: proposal.width ?? .infinity)
-        return CGSize(width: rows.map(\.width).max() ?? 0, height: rows.reduce(0) { $0 + $1.height })
+        let height = rows.reduce(0) { $0 + $1.height } + lineSpacing * CGFloat(max(rows.count - 1, 0))
+        return CGSize(width: rows.map(\.width).max() ?? 0, height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -176,9 +181,9 @@ private struct FlowLayout: Layout {
                     anchor: .topLeading,
                     proposal: ProposedViewSize(size)
                 )
-                x += size.width
+                x += size.width + spacing
             }
-            y += row.height
+            y += row.height + lineSpacing
         }
     }
 
@@ -192,12 +197,14 @@ private struct FlowLayout: Layout {
         var rows = [Row()]
         for (index, subview) in subviews.enumerated() {
             let size = subview.sizeThatFits(.unspecified)
-            if rows[rows.count - 1].width + size.width > maxWidth, !rows[rows.count - 1].indices.isEmpty {
+            let gap = rows[rows.count - 1].indices.isEmpty ? 0 : spacing
+            if rows[rows.count - 1].width + gap + size.width > maxWidth, !rows[rows.count - 1].indices.isEmpty {
                 rows.append(Row())
             }
-            rows[rows.count - 1].indices.append(index)
-            rows[rows.count - 1].width += size.width
-            rows[rows.count - 1].height = max(rows[rows.count - 1].height, size.height)
+            let row = rows.count - 1
+            rows[row].width += (rows[row].indices.isEmpty ? 0 : spacing) + size.width
+            rows[row].indices.append(index)
+            rows[row].height = max(rows[row].height, size.height)
         }
         return rows
     }
