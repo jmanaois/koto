@@ -55,7 +55,7 @@ struct ReviewView: View {
                     if let sentence = card.exampleSentence {
                         VStack(spacing: 4) {
                             HStack(alignment: .center, spacing: 8) {
-                                FuriganaText(sentence, onWordTap: { _ in })
+                                FuriganaText(sentence, highlighting: card.word, onWordTap: { _ in })
                                 SpeakButton(text: sentence, font: .body)
                             }
                             if let translation = card.exampleTranslation {

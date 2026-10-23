@@ -10,6 +10,8 @@ struct FuriganaText: View {
     private let tokens: [FuriganaToken]
     /// Indices into `tokens`, grouped into lines at each line break.
     private let lines: [[Int]]
+    /// Tokens that make up the word passed as `highlighting`, drawn in the accent color.
+    private let highlighted: Set<Int>
     /// Only reserve space above the text when something has a reading.
     private let hasReadings: Bool
     @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
@@ -24,7 +26,14 @@ struct FuriganaText: View {
 
     private var showsReadings: Bool { hasReadings && showFurigana }
 
-    init(_ text: String, onWordTap: @escaping (String) -> Void, onSelect: ((String) -> Void)? = nil) {
+    /// - Parameter word: a dictionary form to emphasize wherever it appears, e.g. a flashcard's word
+    ///   in its example sentence.
+    init(
+        _ text: String,
+        highlighting word: String? = nil,
+        onWordTap: @escaping (String) -> Void,
+        onSelect: ((String) -> Void)? = nil
+    ) {
         self.onWordTap = onWordTap
         self.onSelect = onSelect
         let tokens = Furigana.tokens(for: text)
@@ -38,6 +47,19 @@ struct FuriganaText: View {
         }
         self.tokens = tokens
         self.lines = lines
+
+        var highlighted: Set<Int> = []
+        if let word, let range = Furigana.occurrence(of: word, in: text) {
+            let start = range.lowerBound.utf16Offset(in: text)
+            let end = range.upperBound.utf16Offset(in: text)
+            for (index, token) in tokens.enumerated() where !token.isLineBreak {
+                let length = token.runs.reduce(0) { $0 + $1.text.utf16.count }
+                if token.id < end, token.id + length > start {
+                    highlighted.insert(index)
+                }
+            }
+        }
+        self.highlighted = highlighted
         hasReadings = tokens.contains { token in token.runs.contains { $0.reading != nil } }
     }
 
@@ -66,7 +88,8 @@ struct FuriganaText: View {
         return TokenView(
             runs: token.runs,
             reservesSpace: showsReadings,
-            showsReadings: showsReadings && !Furigana.isForm(of: knownWords, token)
+            showsReadings: showsReadings && !Furigana.isForm(of: knownWords, token),
+            isHighlighted: highlighted.contains(index)
         )
         .background(
             RoundedRectangle(cornerRadius: 4)
@@ -134,6 +157,7 @@ private struct TokenView: View {
     /// Keep room above the text so this word lines up with words that do show readings.
     let reservesSpace: Bool
     let showsReadings: Bool
+    var isHighlighted = false
 
     private static let readingSize: CGFloat = 10
 
@@ -141,6 +165,8 @@ private struct TokenView: View {
         HStack(spacing: 0) {
             ForEach(Array(runs.enumerated()), id: \.offset) { _, run in
                 Text(run.text)
+                    .fontWeight(isHighlighted ? .bold : nil)
+                    .foregroundStyle(isHighlighted ? AnyShapeStyle(.tint) : AnyShapeStyle(.foreground))
                     .fixedSize()
                     // Space for the reading is reserved on every word so lines line up,
                     // and the reading is an overlay so a long one doesn't push words apart.

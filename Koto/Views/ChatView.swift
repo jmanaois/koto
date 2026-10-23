@@ -7,6 +7,7 @@ struct ChatView: View {
     @State private var wordLookup: WordLookup?
     @State private var translating: TranslationTarget?
     @State private var showingSettings = false
+    @State private var confirmingClear = false
     @Query private var savedWords: [SavedWord]
     @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
 
@@ -66,7 +67,7 @@ struct ChatView: View {
                     Button("Settings", systemImage: "gearshape") { showingSettings = true }
                 }
                 ToolbarItem(placement: .principal) {
-                    ModeMenu(mode: $model.mode)
+                    ModeMenu(mode: $model.mode, canClear: !model.isBotTyping) { confirmingClear = true }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
@@ -77,7 +78,18 @@ struct ChatView: View {
                 }
             }
             .sheet(isPresented: $showingSettings) {
-                SettingsView()
+                SettingsView(onImported: { model.reload() })
+            }
+            .confirmationDialog(
+                "Clear this chat?",
+                isPresented: $confirmingClear,
+                titleVisibility: .visible
+            ) {
+                Button("Clear chat with \(model.mode.chatTitle)", role: .destructive) {
+                    model.clearChat()
+                }
+            } message: {
+                Text("Deletes the messages in this chat and starts it over. Your saved words and other chats are kept.")
             }
             .sheet(item: $selectedVocab) { selection in
                 VocabDetailSheet(item: selection.item, example: selection.example)
@@ -101,6 +113,8 @@ struct ChatView: View {
 /// The chat title, which opens a menu for switching who you're talking to.
 private struct ModeMenu: View {
     @Binding var mode: ChatMode
+    let canClear: Bool
+    let onClear: () -> Void
 
     var body: some View {
         Menu {
@@ -109,6 +123,10 @@ private struct ModeMenu: View {
                     Label(mode.title, systemImage: mode.systemImage)
                         .tag(mode)
                 }
+            }
+            Section {
+                Button("Clear this chat…", systemImage: "trash", role: .destructive, action: onClear)
+                    .disabled(!canClear)
             }
         } label: {
             HStack(spacing: 4) {

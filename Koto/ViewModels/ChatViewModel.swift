@@ -147,16 +147,38 @@ final class ChatViewModel {
 
     // MARK: - Persistence
 
-    /// Loads the current mode's conversation, starting it with the mode's welcome if it's empty.
-    private func loadMessages() {
+    /// Reloads the current chat from storage, e.g. after importing a backup.
+    func reload() {
+        guard !isBotTyping else { return }
+        loadMessages()
+    }
+
+    /// Deletes the current mode's conversation and starts it over with the welcome message.
+    /// Saved words are kept.
+    func clearChat() {
+        guard !isBotTyping else { return }
+        for message in (try? context.fetch(currentModeMessages())) ?? [] {
+            context.delete(message)
+        }
+        save()
+        draft = ""
+        loadMessages()
+    }
+
+    /// The current mode's saved messages, oldest first.
+    private func currentModeMessages() -> FetchDescriptor<StoredMessage> {
         let modeName: String? = mode.rawValue
         // Messages saved before modes existed have no mode and belong to the friend chat.
         let includesUntagged = mode == .friend
-        let descriptor = FetchDescriptor<StoredMessage>(
+        return FetchDescriptor<StoredMessage>(
             predicate: #Predicate { $0.mode == modeName || (includesUntagged && $0.mode == nil) },
             sortBy: [SortDescriptor(\.date)]
         )
-        let saved = (try? context.fetch(descriptor)) ?? []
+    }
+
+    /// Loads the current mode's conversation, starting it with the mode's welcome if it's empty.
+    private func loadMessages() {
+        let saved = (try? context.fetch(currentModeMessages())) ?? []
         stored = Dictionary(uniqueKeysWithValues: saved.map { ($0.id, $0) })
         messages = saved.map(\.chatMessage)
 

@@ -137,6 +137,21 @@ nonisolated enum Furigana {
         }
     }
 
+    /// Where `word` (a dictionary form) appears in `text`, allowing for conjugation:
+    /// 食べる is found in 食べました, 面白い in 面白かった, まったり in まったりしてた.
+    static func occurrence(of word: String, in text: String) -> Range<String.Index>? {
+        if let exact = text.range(of: word) {
+            return exact
+        }
+        // Conjugated: match the part that doesn't change, then any kana after it.
+        let stem = word.contains(where: isKanji) ? stem(of: word) : String(word.dropLast())
+        guard stem.count >= (word.contains(where: isKanji) ? 1 : 2), let start = text.range(of: stem) else { return nil }
+        let rest = text[start.upperBound...].prefix { character in
+            character.unicodeScalars.allSatisfy { (0x3041...0x309F).contains($0.value) }
+        }
+        return start.lowerBound..<text.index(start.upperBound, offsetBy: min(rest.count, 4))
+    }
+
     /// The text up to and including its last kanji: 食べる → 食, 大変 → 大変.
     private static func kanjiCore(_ text: String) -> String {
         guard let last = text.lastIndex(where: isKanji) else { return "" }

@@ -1,11 +1,20 @@
+import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
+    /// Called after a backup is imported, so the open chat can reload.
+    var onImported: () -> Void = {}
+
     @AppStorage(AppSettings.strictnessKey) private var strictness = CorrectionStrictness.balanced
     @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
     @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
     @AppStorage(AppSettings.slowSpeechKey) private var slowSpeech = true
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+
+    @State private var exportDocument: BackupDocument?
+    @State private var isImporting = false
+    @State private var backupMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -52,6 +61,15 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Button("Export backup", systemImage: "square.and.arrow.up") { export() }
+                    Button("Import backup", systemImage: "square.and.arrow.down") { isImporting = true }
+                } header: {
+                    Text("Backup")
+                } footer: {
+                    Text("Saves your words (with review history) and all chats to a file in the Files app, so you keep them if the app is deleted. Importing adds what's missing and never deletes anything.")
+                }
+
+                Section {
                     LabeledContent("Model", value: ClaudeChatService.model)
                     LabeledContent("Dictionary", value: "JMdict (EDRDG, CC BY-SA 4.0)")
                 } header: {
@@ -60,11 +78,52 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .fileExporter(
+                isPresented: Binding(get: { exportDocument != nil }, set: { if !$0 { exportDocument = nil } }),
+                document: exportDocument,
+                contentType: .json,
+                defaultFilename: "Koto backup \(Date.now.formatted(.iso8601.year().month().day()))"
+            ) { result in
+                if case .failure(let error) = result {
+                    backupMessage = "Couldn't save the backup: \(error.localizedDescription)"
+                }
+            }
+            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
+                importBackup(result)
+            }
+            .alert("Backup", isPresented: Binding(get: { backupMessage != nil }, set: { if !$0 { backupMessage = nil } })) {
+                Button("OK") {}
+            } message: {
+                Text(backupMessage ?? "")
+            }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
             }
+        }
+    }
+
+    private func export() {
+        do {
+            exportDocument = BackupDocument(data: try Backup(from: context).encoded())
+        } catch {
+            backupMessage = "Couldn't create the backup: \(error.localizedDescription)"
+        }
+    }
+
+    private func importBackup(_ result: Result<URL, Error>) {
+        do {
+            let url = try result.get()
+            // Files from the Files app are outside the sandbox until we ask for access.
+            let didAccess = url.startAccessingSecurityScopedResource()
+            defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
+            let summary = try Backup.decode(Data(contentsOf: url)).merge(into: context)
+            onImported()
+            backupMessage = "Imported \(summary.wordsAdded) new words, updated \(summary.wordsUpdated), "
+                + "and added \(summary.messagesAdded) messages."
+        } catch {
+            backupMessage = "Couldn't import: \(error.localizedDescription)"
         }
     }
 }

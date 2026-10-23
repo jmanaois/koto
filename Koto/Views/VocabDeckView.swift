@@ -45,7 +45,7 @@ struct VocabDeckView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         if let sentence = word.exampleSentence {
-                            Text(sentence)
+                            Text(Self.emphasizing(word.word, in: sentence))
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                                 .lineLimit(1)
@@ -71,6 +71,17 @@ struct VocabDeckView: View {
         }
         .navigationTitle("My words")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// The sentence with the saved word (or its conjugated form) in bold.
+    private static func emphasizing(_ word: String, in sentence: String) -> AttributedString {
+        var text = AttributedString(sentence)
+        if let range = Furigana.occurrence(of: word, in: sentence),
+           let start = AttributedString.Index(range.lowerBound, within: text),
+           let end = AttributedString.Index(range.upperBound, within: text) {
+            text[start..<end].inlinePresentationIntent = .stronglyEmphasized
+        }
+        return text
     }
 
     @ViewBuilder
