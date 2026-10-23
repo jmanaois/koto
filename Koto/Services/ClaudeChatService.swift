@@ -74,6 +74,26 @@ struct ClaudeChatService: ChatService {
         throw ServiceError.emptyTranslation
     }
 
+    func gradeTranslation(
+        _ answer: String, english: String, expected: [String], grammar: GrammarPoint
+    ) async throws -> TranslationGrade {
+        let prompt = "<grammar_point>\(grammar.pattern): \(grammar.meaning)</grammar_point>\n"
+            + "<english>\(english)</english>\n"
+            + "<model_answers>\n\(expected.joined(separator: "\n"))\n</model_answers>\n"
+            + "<learner_answer>\(answer)</learner_answer>"
+        let body: [String: Any] = [
+            "model": Self.model,
+            "max_tokens": 1000,
+            "system": [["type": "text", "text": KotoPrompt.gradeSystem]],
+            "messages": [["role": "user", "content": [["type": "text", "text": prompt]]]],
+            "output_config": [
+                "effort": "low",
+                "format": ["type": "json_schema", "schema": KotoPrompt.gradeSchema],
+            ],
+        ]
+        return try await send(body)
+    }
+
     /// Sends a Messages API request and decodes the JSON the model wrote.
     private func send<Output: Decodable>(_ body: [String: Any]) async throws -> Output {
         guard let apiKey = Self.apiKey() else { throw ServiceError.missingAPIKey }

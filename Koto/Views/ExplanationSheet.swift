@@ -79,7 +79,7 @@ struct ExplanationSheet: View {
 }
 
 /// The sentence split into color-coded parts (topic, object, verb...) with a legend of the roles used.
-private struct StructureView: View {
+struct StructureView: View {
     let chunks: [MessageExplanation.Chunk]
 
     var body: some View {

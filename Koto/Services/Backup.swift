@@ -44,6 +44,17 @@ nonisolated struct Backup: Codable {
         var date: Date
     }
 
+    struct Lesson: Codable {
+        var lessonID: String
+        var completedAt: Date
+        var testedOut: Bool
+    }
+
+    struct Day: Codable {
+        var day: Date
+        var exercises, correct: Int
+    }
+
     var version = 1
     var exportedAt = Date()
     var words: [Word]
@@ -51,6 +62,8 @@ nonisolated struct Backup: Codable {
     // Added after the first version; missing in older backup files.
     var grammar: [Grammar]?
     var mistakes: [Mistake]?
+    var lessons: [Lesson]?
+    var studyDays: [Day]?
 
     /// What an import added or changed, for the confirmation message.
     struct ImportSummary {
@@ -58,6 +71,7 @@ nonisolated struct Backup: Codable {
         var wordsUpdated = 0
         var messagesAdded = 0
         var grammarAdded = 0
+        var lessonsAdded = 0
     }
 
     enum ImportError: LocalizedError {
@@ -108,6 +122,12 @@ extension Backup {
                 point: record.point, original: record.original, explanation: record.explanation,
                 suggested: record.suggested, date: record.date
             )
+        }
+        lessons = try context.fetch(FetchDescriptor<LessonProgress>()).map {
+            Lesson(lessonID: $0.lessonID, completedAt: $0.completedAt, testedOut: $0.testedOut)
+        }
+        studyDays = try context.fetch(FetchDescriptor<StudyDay>()).map {
+            Day(day: $0.day, exercises: $0.exercises, correct: $0.correct)
         }
     }
 
@@ -204,6 +224,17 @@ extension Backup {
         for record in mistakes ?? [] where !existingMistakes.contains("\(record.date.timeIntervalSince1970)|\(record.original)") {
             let correction = Correction(original: record.original, suggested: record.suggested, type: .grammar, explanation: record.explanation)
             context.insert(MistakeRecord(point: record.point, correction: correction, date: record.date))
+        }
+
+        let existingLessons = Set(try context.fetch(FetchDescriptor<LessonProgress>()).map(\.lessonID))
+        for record in lessons ?? [] where !existingLessons.contains(record.lessonID) {
+            context.insert(LessonProgress(lessonID: record.lessonID, completedAt: record.completedAt, testedOut: record.testedOut))
+            summary.lessonsAdded += 1
+        }
+
+        let existingDays = Set(try context.fetch(FetchDescriptor<StudyDay>()).map(\.day))
+        for record in studyDays ?? [] where !existingDays.contains(record.day) {
+            context.insert(StudyDay(day: record.day, exercises: record.exercises, correct: record.correct))
         }
 
         try context.save()

@@ -325,6 +325,36 @@ nonisolated enum KotoPrompt {
         ]
     }
 
+    static let gradeSystem = """
+    You check answers in a beginner (JLPT N5) Japanese grammar course. The learner translated an English \
+    sentence into Japanese to practice one grammar point. Decide whether their answer is correct Japanese \
+    that means the same thing.
+
+    - Mark it correct if a native speaker would accept it as a translation, even if it differs from the \
+    model answers: other natural word orders, other fitting vocabulary, plain or polite style, and dropped \
+    pronouns like 私は are all fine.
+    - Mark it wrong for grammar mistakes (wrong particle, wrong conjugation), a different meaning, or not \
+    using the grammar point when the sentence needs it.
+    - Ignore kanji vs. kana, punctuation, spaces and full-width vs. half-width characters. A kana typo that \
+    makes a different or non-existent word is wrong.
+
+    "feedback": one or two short sentences in English. If wrong, say exactly what to fix. If right but \
+    different from the model answers, say briefly how it differs or that it's also natural. If right and \
+    matching, a few words of praise.
+    """
+
+    static var gradeSchema: [String: Any] {
+        [
+            "type": "object",
+            "properties": [
+                "correct": ["type": "boolean"],
+                "feedback": ["type": "string"],
+            ],
+            "required": ["correct", "feedback"],
+            "additionalProperties": false,
+        ]
+    }
+
     static func practiceWordsBlock(_ words: [VocabItem]) -> String {
         let lines = words.map { "\($0.word) (\($0.reading)): \($0.meaning)" }
         return "<practice_words>\n" + lines.joined(separator: "\n") + "\n</practice_words>"

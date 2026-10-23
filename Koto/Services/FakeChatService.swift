@@ -25,6 +25,13 @@ struct FakeChatService: ChatService {
         )
     }
 
+    func gradeTranslation(
+        _ answer: String, english: String, expected: [String], grammar: GrammarPoint
+    ) async throws -> TranslationGrade {
+        try await Task.sleep(for: .milliseconds(600))
+        return TranslationGrade(correct: false, feedback: "(Sample feedback; the real check comes from Claude.)")
+    }
+
     // MARK: - Corrections
 
     private struct Rule {

@@ -48,7 +48,9 @@ nonisolated enum Furigana {
             ) as? String
             let end = range.location + range.length
             let nextCharacter = end < utf16.count ? substring(text, end, end + 1).first : nil
-            let reading = readingOverride(for: word, next: nextCharacter) ?? everydayReading(of: word, transcription)
+            let previousCharacter = range.location > 0 ? substring(text, range.location - 1, range.location).first : nil
+            let reading = readingOverride(for: word, previous: previousCharacter, next: nextCharacter)
+                ?? everydayReading(of: word, transcription)
             tokens.append(FuriganaToken(
                 id: range.location,
                 runs: runs(for: word, reading: reading),
@@ -243,10 +245,14 @@ nonisolated enum Furigana {
     }
 
     /// Fixes the dictionary can't make: 私's わたくし is its own entry, and 何 depends on what follows.
-    private static func readingOverride(for word: String, next: Character?) -> String? {
+    private static func readingOverride(for word: String, previous: Character?, next: Character?) -> String? {
         switch word {
         case "私":
             return "わたし"
+        case "人":
+            // じん after a country or place name in katakana (アメリカ人); the tokenizer splits it off and says にん.
+            let isKatakana = previous?.unicodeScalars.first.map { (0x30A1...0x30FA).contains($0.value) || $0.value == 0x30FC } == true
+            return isKatakana ? "じん" : nil
         case "何":
             // なん before counters and で/の/だ/と/て (何で, 何の, 何時); なに otherwise (何する, 何見た).
             let nanFollowers: Set<Character> = ["で", "の", "だ", "と", "て", "時", "回", "人", "歳", "個", "本", "枚", "度", "年", "月", "日", "分"]

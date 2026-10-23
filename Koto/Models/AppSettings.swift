@@ -6,6 +6,10 @@ nonisolated enum AppSettings {
     static let furiganaKey = "showFurigana"
     static let fadeKnownFuriganaKey = "fadeKnownFurigana"
     static let slowSpeechKey = "slowSpeech"
+    static let reminderKey = "dailyLessonReminder"
+    /// Minutes after midnight.
+    static let reminderMinutesKey = "dailyLessonReminderMinutes"
+    static let defaultReminderMinutes = 20 * 60
 
     static var strictness: CorrectionStrictness {
         UserDefaults.standard.string(forKey: strictnessKey).flatMap(CorrectionStrictness.init(rawValue:)) ?? .balanced

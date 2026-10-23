@@ -200,7 +200,7 @@ private struct DatePill: View {
 
 #Preview {
     let container = try! ModelContainer(
-        for: SavedWord.self, SavedGrammar.self, MistakeRecord.self, StoredMessage.self,
+        for: SavedWord.self, SavedGrammar.self, MistakeRecord.self, StoredMessage.self, LessonProgress.self, StudyDay.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     ChatView(model: ChatViewModel(context: container.mainContext, service: FakeChatService()))

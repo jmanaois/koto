@@ -9,6 +9,8 @@ struct SettingsView: View {
     @AppStorage(AppSettings.furiganaKey) private var showFurigana = true
     @AppStorage(AppSettings.fadeKnownFuriganaKey) private var fadeKnownFurigana = true
     @AppStorage(AppSettings.slowSpeechKey) private var slowSpeech = true
+    @AppStorage(AppSettings.reminderKey) private var reminder = false
+    @AppStorage(AppSettings.reminderMinutesKey) private var reminderMinutes = AppSettings.defaultReminderMinutes
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
 
@@ -61,12 +63,33 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Toggle("Daily lesson reminder", isOn: $reminder)
+                    if reminder {
+                        DatePicker("Time", selection: reminderTime, displayedComponents: .hourAndMinute)
+                    }
+                } header: {
+                    Text("Learn")
+                } footer: {
+                    Text("A notification for the daily grammar lesson. Skipped on days you've already done it.")
+                }
+                .onChange(of: reminder) {
+                    Task {
+                        if reminder, !(await Reminders.requestPermission()) {
+                            // Notifications are turned off for Koto in iOS Settings.
+                            reminder = false
+                        }
+                        Reminders.reschedule(context: context)
+                    }
+                }
+                .onChange(of: reminderMinutes) { Reminders.reschedule(context: context) }
+
+                Section {
                     Button("Export backup", systemImage: "square.and.arrow.up") { export() }
                     Button("Import backup", systemImage: "square.and.arrow.down") { isImporting = true }
                 } header: {
                     Text("Backup")
                 } footer: {
-                    Text("Saves your words and grammar (with review history), mistakes and all chats to a file in the Files app, so you keep them if the app is deleted. Importing adds what's missing and never deletes anything.")
+                    Text("Saves your words and grammar (with review history), mistakes, course progress and all chats to a file in the Files app, so you keep them if the app is deleted. Importing adds what's missing and never deletes anything.")
                 }
 
                 Section {
@@ -104,6 +127,16 @@ struct SettingsView: View {
         }
     }
 
+    /// The reminder time as a date today, for the time picker.
+    private var reminderTime: Binding<Date> {
+        Binding {
+            Calendar.current.startOfDay(for: .now).addingTimeInterval(TimeInterval(reminderMinutes * 60))
+        } set: { date in
+            let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+            reminderMinutes = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+        }
+    }
+
     private func export() {
         do {
             exportDocument = BackupDocument(data: try Backup(from: context).encoded())
@@ -121,7 +154,7 @@ struct SettingsView: View {
             let summary = try Backup.decode(Data(contentsOf: url)).merge(into: context)
             onImported()
             backupMessage = "Imported \(summary.wordsAdded) new words (updated \(summary.wordsUpdated)), "
-                + "\(summary.grammarAdded) grammar patterns and \(summary.messagesAdded) messages."
+                + "\(summary.grammarAdded) grammar patterns, \(summary.lessonsAdded) course lessons and \(summary.messagesAdded) messages."
         } catch {
             backupMessage = "Couldn't import: \(error.localizedDescription)"
         }
