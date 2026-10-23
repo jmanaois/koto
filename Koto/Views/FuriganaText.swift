@@ -67,7 +67,7 @@ struct FuriganaText: View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                 if line.isEmpty {
-                    TokenView(runs: [.init(text: " ", reading: nil)], reservesSpace: showsReadings, showsReadings: false)
+                    TokenView(runs: [.init(text: " ", reading: nil)], reservesSpace: false, showsReadings: false)
                 } else {
                     FlowLayout {
                         ForEach(line, id: \.self) { index in
@@ -87,7 +87,8 @@ struct FuriganaText: View {
         let isSelected = selection?.contains(index) == true
         return TokenView(
             runs: token.runs,
-            reservesSpace: showsReadings,
+            // Only words with a reading are taller, so lines of English or kana stay compact.
+            reservesSpace: showsReadings && token.runs.contains { $0.reading != nil },
             showsReadings: showsReadings && !Furigana.isForm(of: knownWords, token),
             isHighlighted: highlighted.contains(index)
         )

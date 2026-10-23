@@ -6,6 +6,7 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
     case senpai
     case group
     case online
+    case drill
 
     var id: String { rawValue }
 
@@ -16,6 +17,7 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
         case .senpai: "先輩 · Senpai at work"
         case .group: "グループ · Group chat"
         case .online: "ネット · Discord / X"
+        case .drill: "ドリル · Genki → real life"
         }
     }
 
@@ -25,6 +27,7 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
         case .senpai: "person.badge.shield.checkmark"
         case .group: "person.3"
         case .online: "number"
+        case .drill: "pencil.and.list.clipboard"
         }
     }
 
@@ -35,6 +38,7 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
         case .senpai: "こと先輩"
         case .group: "大学の友達 (4)"
         case .online: "こと @ Discord"
+        case .drill: "ドリル"
         }
     }
 
@@ -49,6 +53,7 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
         case (.group, "はるか"): Persona(name: "はるか", initial: "は", color: 0xA77BDB)
         case (.senpai, _): Persona(name: "こと先輩", initial: "こ", color: 0xE9963E)
         case (.online, _): Persona(name: "koto_", initial: "こ", color: 0x6C63FF)
+        case (.drill, _): Persona(name: "こと先生", initial: "先", color: 0xE5484D)
         default: Persona(name: "こと", initial: "こ", color: 0x2BB673)
         }
     }
@@ -68,6 +73,13 @@ nonisolated enum ChatMode: String, CaseIterable, Identifiable {
             ]
         case .online:
             [(nil, "おつ〜！ことです✌️\nここはネットのノリで話そ。草とかwとか使ってOKだよw")]
+        case .drill:
+            [(nil, """
+            ドリルの時間だよ！✏️
+            Rewrite each textbook sentence the way you'd actually text a friend. I'll check it and give you the next one.
+
+            次：昨日、友達と映画を見に行きました。
+            """)]
         }
     }
 }
