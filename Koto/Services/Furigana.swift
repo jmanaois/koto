@@ -48,7 +48,7 @@ nonisolated enum Furigana {
             ) as? String
             let end = range.location + range.length
             let nextCharacter = end < utf16.count ? substring(text, end, end + 1).first : nil
-            let reading = readingOverride(for: word, next: nextCharacter) ?? hiraganaReading(transcription)
+            let reading = readingOverride(for: word, next: nextCharacter) ?? everydayReading(of: word, transcription)
             tokens.append(FuriganaToken(
                 id: range.location,
                 runs: runs(for: word, reading: reading),
@@ -58,7 +58,43 @@ nonisolated enum Furigana {
         if cursor < utf16.count {
             tokens += plainTokens(substring(text, cursor, utf16.count), from: cursor)
         }
-        return keepingPunctuationAttached(tokens)
+        return keepingPunctuationAttached(joiningCompounds(tokens))
+    }
+
+    /// The tokenizer sometimes splits a word it doesn't know as a whole (金曜+日, 一昨+日), which
+    /// gives the wrong reading for the pieces. Join up to three neighbouring kanji pieces when the
+    /// dictionary has them together as a common word, and use that word's reading.
+    private static func joiningCompounds(_ tokens: [FuriganaToken]) -> [FuriganaToken] {
+        func text(_ token: FuriganaToken) -> String { token.runs.map(\.text).joined() }
+        func isKanjiWord(_ token: FuriganaToken) -> Bool {
+            !token.isLineBreak && token.lookupText != nil && text(token).allSatisfy(isKanji)
+        }
+
+        var result: [FuriganaToken] = []
+        var index = 0
+        while index < tokens.count {
+            var merged: FuriganaToken?
+            var consumed = 1
+            if isKanjiWord(tokens[index]) {
+                for count in stride(from: 3, through: 2, by: -1) where index + count <= tokens.count {
+                    let group = tokens[index..<(index + count)]
+                    guard group.allSatisfy(isKanjiWord) else { continue }
+                    let word = group.map(text).joined()
+                    if let reading = JapaneseDictionary.shared.commonReading(of: word) {
+                        merged = FuriganaToken(
+                            id: tokens[index].id,
+                            runs: runs(for: word, reading: reading),
+                            lookupText: tokens[index].lookupText
+                        )
+                        consumed = count
+                        break
+                    }
+                }
+            }
+            result.append(merged ?? tokens[index])
+            index += consumed
+        }
+        return result
     }
 
     /// Japanese text never starts a line with closing punctuation, so glue it onto the
@@ -183,11 +219,17 @@ nonisolated enum Furigana {
         }
     }
 
-    /// Fixes for common words the tokenizer reads differently from everyday speech.
+    /// The tokenizer's reading, switched to the dictionary's main reading when the tokenizer
+    /// picked a formal or rare variant (明日 あす → あした, 昨日 さくじつ → きのう).
+    private static func everydayReading(of word: String, _ transcription: String?) -> String? {
+        guard let reading = hiraganaReading(transcription) else { return nil }
+        guard word.contains(where: isKanji) else { return reading }
+        return JapaneseDictionary.shared.everydayReading(of: word, insteadOf: reading) ?? reading
+    }
+
+    /// Fixes the dictionary can't make: 私's わたくし is its own entry, and 何 depends on what follows.
     private static func readingOverride(for word: String, next: Character?) -> String? {
         switch word {
-        case "日本":
-            return "にほん"
         case "私":
             return "わたし"
         case "何":

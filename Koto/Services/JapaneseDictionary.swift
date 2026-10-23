@@ -27,7 +27,8 @@ nonisolated struct LookupResult {
 }
 
 /// Read-only access to the bundled JMdict database (built by tools/build_dictionary.py).
-final class JapaneseDictionary {
+/// SQLite's default threading mode serializes access, so it's safe to share.
+nonisolated final class JapaneseDictionary: @unchecked Sendable {
     static let shared = JapaneseDictionary()
 
     private var db: OpaquePointer?
@@ -72,6 +73,61 @@ final class JapaneseDictionary {
         return nil
     }
 
+    /// The everyday reading of `word` when `reading` is only a variant of the same dictionary entry,
+    /// e.g. 明日 read あす → あした, 今日 read こんにち → きょう. Also when `reading` only fits a rare
+    /// spelling (何時 read なんどき → なんじ). nil when `reading` is already right, belongs to a
+    /// different common word with the same kanji (方 ほう vs かた), or isn't known.
+    func everydayReading(of word: String, insteadOf reading: String) -> String? {
+        // The entry that has both this spelling and this reading, most common first.
+        let matching = firstRow("""
+            SELECT e.reading, k.common
+            FROM forms k JOIN forms r ON r.entry_id = k.entry_id JOIN entries e ON e.id = k.entry_id
+            WHERE k.form = ? AND r.form = ?
+            ORDER BY k.common DESC, e.common DESC, e.id
+            LIMIT 1
+            """, word, reading)
+
+        var main = matching?.reading
+        if matching == nil || matching?.isCommon == false {
+            // The reading only fits a rare spelling of this kanji: use the common word written this way.
+            main = firstRow("""
+                SELECT e.reading, k.common
+                FROM forms k JOIN entries e ON e.id = k.entry_id
+                WHERE k.form = ? AND k.common = 1
+                ORDER BY e.common DESC, e.id
+                LIMIT 1
+                """, word)?.reading ?? main
+        }
+        guard let main else { return nil }
+        // Some entries list a katakana main reading; furigana is always hiragana.
+        let hiragana = main.applyingTransform(.hiraganaToKatakana, reverse: true) ?? main
+        return hiragana == reading ? nil : hiragana
+    }
+
+    /// The main reading of `word` if it's a common spelling of some word, in hiragana.
+    func commonReading(of word: String) -> String? {
+        guard let main = firstRow("""
+            SELECT e.reading, k.common
+            FROM forms k JOIN entries e ON e.id = k.entry_id
+            WHERE k.form = ? AND k.common = 1
+            ORDER BY e.common DESC, e.id
+            LIMIT 1
+            """, word)?.reading else { return nil }
+        return main.applyingTransform(.hiraganaToKatakana, reverse: true) ?? main
+    }
+
+    private func firstRow(_ sql: String, _ arguments: String...) -> (reading: String, isCommon: Bool)? {
+        guard let db else { return nil }
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else { return nil }
+        defer { sqlite3_finalize(statement) }
+        for (index, argument) in arguments.enumerated() {
+            sqlite3_bind_text(statement, Int32(index + 1), argument, -1, sqliteTransient)
+        }
+        guard sqlite3_step(statement) == SQLITE_ROW, let text = sqlite3_column_text(statement, 0) else { return nil }
+        return (String(cString: text), sqlite3_column_int(statement, 1) != 0)
+    }
+
     func entries(for form: String, limit: Int = 5) -> [DictionaryEntry] {
         guard let db else { return [] }
         let sql = """
@@ -107,7 +163,7 @@ final class JapaneseDictionary {
 }
 
 /// Tells SQLite to copy bound strings (Swift doesn't import the SQLITE_TRANSIENT macro).
-private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+nonisolated private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 /// Turns conjugated words back into dictionary forms so they can be looked up.
 /// Each candidate comes with the part of speech the dictionary entry must have,
