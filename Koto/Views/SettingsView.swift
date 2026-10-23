@@ -48,7 +48,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Listening")
                 } footer: {
-                    Text("Tap the speaker under こと's messages, on word lookups and on flashcards. Long-press any bubble and choose Listen. Uses the built-in iOS Japanese voice.")
+                    Text("Tap the speaker under こと's messages, on word lookups and on flashcards. Or hold and drag across any words to highlight them, then tap the speaker. Uses the built-in iOS Japanese voice.")
                 }
 
                 Section {

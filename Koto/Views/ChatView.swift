@@ -28,6 +28,7 @@ struct ChatView: View {
                                 persona: model.mode.persona(for: message.speaker),
                                 onVocabTap: { selectedVocab = VocabSelection(item: $0, message: message) },
                                 onWordTap: { wordLookup = WordLookup(text: $0, in: message) },
+                                onSelect: { wordLookup = WordLookup(text: $0, in: message, isSelection: true) },
                                 onTranslate: { translating = TranslationTarget(id: message.id) }
                             )
                             .id(message.id)

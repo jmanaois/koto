@@ -1,17 +1,20 @@
 import SwiftUI
 
-/// A word the user tapped in a message, and what the dictionary found for it.
+/// A word the user tapped or highlighted in a message, and what the dictionary found for it.
 struct WordLookup: Identifiable {
     let id = UUID()
-    /// Text from the tapped word onward, e.g. 食べましたか.
+    /// Text from the tapped word onward (食べましたか), or exactly what was highlighted.
     let text: String
+    /// True when the user highlighted `text` themselves, so it's shown with Listen and Copy.
+    let isSelection: Bool
     let result: LookupResult?
-    /// The sentence the word was tapped in, saved with the word for its flashcard.
+    /// The sentence the word was found in, saved with the word for its flashcard.
     let example: ExampleSentence?
 
-    init(text: String, in message: ChatMessage) {
+    init(text: String, in message: ChatMessage, isSelection: Bool = false) {
         self.text = text
-        result = JapaneseDictionary.shared.lookup(text)
+        self.isSelection = isSelection
+        result = JapaneseDictionary.shared.lookup(text, maxLength: isSelection ? 24 : 12)
         example = ExampleSentence(from: message, containing: result?.matched ?? text)
     }
 }
@@ -22,6 +25,29 @@ struct WordLookupSheet: View {
     var body: some View {
         NavigationStack {
             List {
+                if lookup.isSelection {
+                    Section {
+                        HStack(spacing: 12) {
+                            FuriganaText(lookup.text, onWordTap: { _ in })
+                                .font(.title3)
+                            Spacer()
+                            SpeakButton(text: lookup.text)
+                            Button("Copy", systemImage: "doc.on.doc") {
+                                UIPasteboard.general.string = lookup.text
+                            }
+                            .labelStyle(.iconOnly)
+                            .font(.title3)
+                            .buttonStyle(.borderless)
+                        }
+                    } header: {
+                        Text("Highlighted")
+                    } footer: {
+                        if let matched = lookup.result?.matched, matched != lookup.text {
+                            Text("Showing the dictionary word at the start: \(matched)")
+                        }
+                    }
+                }
+
                 if let result = lookup.result {
                     ForEach(result.entries) { entry in
                         Section {

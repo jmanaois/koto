@@ -8,6 +8,8 @@ struct MessageRow: View {
     let onVocabTap: (VocabItem) -> Void
     /// Called with the text starting at a tapped word, for dictionary lookup.
     let onWordTap: (String) -> Void
+    /// Called with the text the user highlighted by pressing and dragging.
+    let onSelect: (String) -> Void
     /// Opens the translation and breakdown of a bot message.
     let onTranslate: () -> Void
 
@@ -26,7 +28,7 @@ struct MessageRow: View {
                     .font(.caption)
                     .foregroundStyle(Theme.metaText)
                 HStack(alignment: .bottom, spacing: 4) {
-                    Bubble(text: message.text, sender: .bot, onWordTap: onWordTap)
+                    Bubble(text: message.text, sender: .bot, onWordTap: onWordTap, onSelect: onSelect)
                     TimeLabel(date: message.date)
                 }
                 if !message.isError {
@@ -53,7 +55,7 @@ struct MessageRow: View {
                 }
                 .font(.caption2)
                 .foregroundStyle(Theme.metaText)
-                Bubble(text: message.text, sender: .user, onWordTap: onWordTap)
+                Bubble(text: message.text, sender: .user, onWordTap: onWordTap, onSelect: onSelect)
             }
             if !message.practicedWords.isEmpty {
                 ReviewedBadge(words: message.practicedWords)
@@ -70,13 +72,14 @@ private struct Bubble: View {
     let text: String
     let sender: Sender
     let onWordTap: (String) -> Void
+    let onSelect: (String) -> Void
 
     private var textColor: Color {
         sender == .user ? Theme.userBubbleText : .primary
     }
 
     var body: some View {
-        FuriganaText(text, onWordTap: onWordTap)
+        FuriganaText(text, onWordTap: onWordTap, onSelect: onSelect)
             .font(.body)
             .foregroundStyle(textColor)
             .padding(.horizontal, 12)
@@ -91,15 +94,6 @@ private struct Bubble: View {
                     topTrailingRadius: sender == .user ? 4 : 18
                 )
             )
-            // Words are laid out individually, so offer Copy instead of text selection.
-            .contextMenu {
-                Button("Listen", systemImage: "speaker.wave.2") {
-                    Speech.shared.speak(text)
-                }
-                Button("Copy", systemImage: "doc.on.doc") {
-                    UIPasteboard.general.string = text
-                }
-            }
     }
 }
 
