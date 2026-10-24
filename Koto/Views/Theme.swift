@@ -82,15 +82,17 @@ extension EnvironmentValues {
 }
 
 extension Color {
-    init(light: UInt32, dark: UInt32) {
-        self.init(uiColor: UIColor { traits in
+    /// UIKit calls the provider on whatever thread is rendering (SwiftUI's async renderer
+    /// included), so it must not inherit the module's default MainActor isolation.
+    nonisolated init(light: UInt32, dark: UInt32) {
+        self.init(uiColor: UIColor { @Sendable traits in
             UIColor(hex: traits.userInterfaceStyle == .dark ? dark : light)
         })
     }
 }
 
 private extension UIColor {
-    convenience init(hex: UInt32) {
+    nonisolated convenience init(hex: UInt32) {
         self.init(
             red: CGFloat((hex >> 16) & 0xFF) / 255,
             green: CGFloat((hex >> 8) & 0xFF) / 255,
