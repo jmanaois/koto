@@ -93,10 +93,44 @@ nonisolated enum Furigana {
                     }
                 }
             }
+            if merged == nil, let (word, rest) = splitOffKanji(tokens, at: index) {
+                result += [word, rest]
+                index += 2
+                continue
+            }
             result.append(merged ?? tokens[index])
             index += consumed
         }
         return result
+    }
+
+    /// The tokenizer sometimes cuts a word after its first kanji and glues the second onto the
+    /// next word: 上手はずだ reads as 上(うえ) + 手はず(てはず). When a lone kanji and the kanji that
+    /// start the next word make a common word, and the kana left over is a word of its own, regroup
+    /// them as 上手(じょうず) + はず. Requiring a real word leaves verb endings alone, so 夜 + 行った
+    /// doesn't become 夜行(やこう).
+    private static func splitOffKanji(_ tokens: [FuriganaToken], at index: Int) -> (FuriganaToken, FuriganaToken)? {
+        guard index + 1 < tokens.count else { return nil }
+        let first = tokens[index], next = tokens[index + 1]
+        let firstText = first.runs.map(\.text).joined()
+        let nextText = next.runs.map(\.text).joined()
+        guard !first.isLineBreak, !next.isLineBreak, first.lookupText != nil, next.lookupText != nil,
+              firstText.count == 1, firstText.allSatisfy(isKanji) else { return nil }
+
+        let kanji = nextText.prefix(while: isKanji)
+        let kana = nextText.dropFirst(kanji.count)
+        guard !kanji.isEmpty, kana.count >= 2, !kana.contains(where: isKanji),
+              JapaneseDictionary.shared.commonReading(of: String(kana)) != nil,
+              let reading = JapaneseDictionary.shared.commonReading(of: firstText + kanji)
+        else { return nil }
+
+        let word = FuriganaToken(id: first.id, runs: runs(for: firstText + kanji, reading: reading), lookupText: first.lookupText)
+        let rest = FuriganaToken(
+            id: next.id + kanji.utf16.count,
+            runs: [.init(text: String(kana), reading: nil)],
+            lookupText: next.lookupText.map { String($0.dropFirst(kanji.count)) }
+        )
+        return (word, rest)
     }
 
     /// Japanese text never starts a line with closing punctuation, so glue it onto the
