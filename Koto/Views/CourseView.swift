@@ -12,6 +12,9 @@ struct CourseView: View {
     @Query private var grammar: [SavedGrammar]
     @Query private var mistakes: [MistakeRecord]
     @State private var session: LessonSession?
+    /// Ids of the units showing their lessons. Starts with the unit you're on.
+    @State private var expanded: Set<Int> = []
+    @State private var didOpenCurrent = false
 
     private var done: Set<String> { Set(progress.map(\.lessonID)) }
     private var nextLesson: CourseLesson? { Curriculum.lessons.first { !done.contains($0.id) } }
@@ -54,11 +57,18 @@ struct CourseView: View {
                     }
                 }
 
-                ForEach(Curriculum.units) { unit in
-                    unitSection(unit)
+                ForEach(levels, id: \.level) { group in
+                    levelSection(group.level, units: group.units)
                 }
             }
             .navigationTitle("Learn")
+            .onAppear {
+                guard !didOpenCurrent else { return }
+                didOpenCurrent = true
+                if let next = nextLesson, let unit = Curriculum.unit(of: next) {
+                    expanded.insert(unit.id)
+                }
+            }
             .navigationDestination(for: CourseLesson.self) { lesson in
                 LessonDetailView(lesson: lesson, isDone: done.contains(lesson.id)) {
                     session = LessonSession(lesson: lesson, isDone: done.contains(lesson.id), context: context, service: service)
@@ -70,13 +80,56 @@ struct CourseView: View {
         }
     }
 
-    private func unitSection(_ unit: CourseUnit) -> some View {
-        let finished = unit.lessons.filter { done.contains($0.id) }.count
+    /// Units grouped by JLPT level, in course order.
+    private var levels: [(level: String, units: [CourseUnit])] {
+        var groups: [(level: String, units: [CourseUnit])] = []
+        for unit in Curriculum.units {
+            if groups.last?.level == unit.level {
+                groups[groups.count - 1].units.append(unit)
+            } else {
+                groups.append((unit.level, [unit]))
+            }
+        }
+        return groups
+    }
+
+    private func levelSection(_ level: String, units: [CourseUnit]) -> some View {
+        let lessons = units.flatMap(\.lessons)
+        let finished = lessons.filter { done.contains($0.id) }.count
         return Section {
+            ForEach(units) { unit in
+                unitRows(unit)
+            }
+        } header: {
+            HStack {
+                Text(level)
+                Spacer()
+                Text("\(finished)/\(lessons.count)")
+                    .monospacedDigit()
+            }
+        }
+    }
+
+    /// A unit's row, and when it's open, its lessons and the test-out button.
+    @ViewBuilder
+    private func unitRows(_ unit: CourseUnit) -> some View {
+        let finished = unit.lessons.filter { done.contains($0.id) }.count
+        let isOpen = expanded.contains(unit.id)
+        Button {
+            withAnimation(.snappy) {
+                if isOpen { expanded.remove(unit.id) } else { expanded.insert(unit.id) }
+            }
+        } label: {
+            UnitRow(unit: unit, finished: finished, hasNext: nextLesson.map(unit.lessons.contains) ?? false, isOpen: isOpen)
+        }
+        .buttonStyle(.plain)
+
+        if isOpen {
             ForEach(unit.lessons) { lesson in
                 NavigationLink(value: lesson) {
                     LessonRow(lesson: lesson, record: progress.first { $0.lessonID == lesson.id }, isNext: lesson == nextLesson)
                 }
+                .padding(.leading, 12)
             }
             if finished < unit.lessons.count {
                 Button {
@@ -85,16 +138,8 @@ struct CourseView: View {
                     Label("Already know this? Test out", systemImage: "forward.fill")
                         .font(.subheadline)
                 }
+                .padding(.leading, 12)
             }
-        } header: {
-            HStack {
-                Text("\(unit.level) · Unit \(unit.id) · \(unit.title)")
-                Spacer()
-                Text("\(finished)/\(unit.lessons.count)")
-                    .monospacedDigit()
-            }
-        } footer: {
-            Text(unit.summary)
         }
     }
 }
@@ -233,6 +278,72 @@ private struct TodayCard: View {
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+/// A unit at a glance: progress ring, title, what it covers, and whether it's open.
+private struct UnitRow: View {
+    @Environment(\.theme) private var theme
+    let unit: CourseUnit
+    let finished: Int
+    /// Holds the next lesson to learn.
+    let hasNext: Bool
+    let isOpen: Bool
+
+    private var isComplete: Bool { finished == unit.lessons.count }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .stroke(Color(.tertiarySystemFill), lineWidth: 4)
+                Circle()
+                    .trim(from: 0, to: Double(finished) / Double(max(1, unit.lessons.count)))
+                    .stroke(isComplete ? Color.green : theme.accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                if isComplete {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.green)
+                } else {
+                    Text("\(unit.id)")
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                }
+            }
+            .frame(width: 36, height: 36)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(unit.title)
+                        .font(.headline)
+                    if hasNext {
+                        Image(systemName: "play.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.tint)
+                    }
+                }
+                Text(unit.summary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(isOpen ? 3 : 1)
+            }
+
+            Spacer(minLength: 4)
+
+            Text("\(finished)/\(unit.lessons.count)")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+            Image(systemName: "chevron.down")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.tertiary)
+                .rotationEffect(.degrees(isOpen ? 0 : -90))
+        }
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(isOpen ? "Hides the lessons" : "Shows the lessons")
     }
 }
 
