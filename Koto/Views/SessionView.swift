@@ -140,6 +140,8 @@ private struct ExerciseView: View {
             BuildExercise(english: english, tiles: chunks.map(\.text) + extras, isLocked: feedback != nil, pending: $pending)
         case .translate(let english, _):
             TranslateExercise(english: english, isLocked: feedback != nil, pending: $pending)
+        case .conjugate(let verb, let forms):
+            ConjugateExercise(verb: verb, forms: forms, isLocked: feedback != nil, pending: $pending)
         }
     }
 }
@@ -337,6 +339,69 @@ private struct TranslateExercise: View {
     }
 }
 
+/// Type a verb in the asked-for form.
+private struct ConjugateExercise: View {
+    @Environment(\.theme) private var theme
+    let verb: Verb
+    let forms: [VerbForm]
+    let isLocked: Bool
+    @Binding var pending: LessonSession.Answer?
+
+    @State private var text = ""
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Conjugate")
+                .font(.title3.bold())
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .center, spacing: 8) {
+                    FuriganaText(verb.kanji, onWordTap: { _ in })
+                        .font(.largeTitle)
+                    SpeakButton(text: verb.kanji, font: .body)
+                }
+                Text(verb.english)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+
+            FlowLayout(spacing: 8, lineSpacing: 8) {
+                ForEach(Array(forms.enumerated()), id: \.offset) { index, form in
+                    if index > 0 {
+                        Image(systemName: "arrow.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(height: 30)
+                    }
+                    Text(form.label)
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(theme.accent.opacity(0.15), in: Capsule())
+                }
+            }
+
+            TextField("活用形…", text: $text)
+                .font(.title2)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .focused($isFocused)
+                .padding(12)
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(isLocked)
+                .onChange(of: text) {
+                    let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    pending = trimmed.isEmpty ? nil : .typed(trimmed)
+                }
+            Text("Kanji or kana both work. Checked on your phone, no connection needed.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .onAppear { isFocused = true }
+    }
+}
+
 // MARK: - Feedback
 
 /// Right or wrong, the answer with furigana and audio, its structure, and Continue.
@@ -368,7 +433,7 @@ private struct FeedbackBar: View {
                 .font(.title3.bold())
                 .foregroundStyle(color)
 
-            if case .translate = exercise, feedback.verdict != .right {
+            if exercise.isTyped, feedback.verdict != .right {
                 Text("You wrote: \(feedback.given)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)

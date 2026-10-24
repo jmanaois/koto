@@ -1,0 +1,193 @@
+import Foundation
+
+nonisolated extension N3Course {
+    // MARK: - Unit 14
+
+    static let unit14 = CourseUnit(id: 14, title: "Purpose and reasoning", summary: "ために, ように, はずだ, わけだ, わけではない, ばかり", lessons: [
+        lesson(
+            "n3.1.1", "〜ために", "in order to / because of",
+            form: "Volitional verb (dictionary form) + ために; Noun + の + ために; plain past or ている + ために (cause)",
+            note: "ために has two jobs. After a volitional verb in the dictionary form, with the same subject in both halves, it means \"in order to\": 留学するために貯金している. After Noun + の (or a plain past clause) it means \"because of\", a stiff, written-sounding reason you hear in announcements: 事故のために電車が遅れています. The classic mistake is using ために with a potential or non-volitional verb (話せるために): that needs ように. In writing, ために is often shortened to ため, and in everyday speech the cause sense usually becomes で or から instead.",
+            examples: [("日本の大学に入るために、毎日三時間勉強しています。", "I study three hours a day to get into a Japanese university."), ("大雨のため、試合は中止になりました。", "The game was called off because of heavy rain."), ("家族のために、もっと早く帰れる仕事を探している。", "I'm looking for a job where I can get home earlier, for my family's sake.")],
+            keywords: ["ために", "ため", "in order to", "purpose"],
+            pick("家を買う＿＿、毎月十万円ずつ貯金しています。", "I'm saving 100,000 yen a month in order to buy a house.", "ために", "ように", "ための", "ことに"),
+            pick("大雪＿＿、新幹線が二時間も遅れた。", "The shinkansen was two whole hours late because of the heavy snow.", "のために", "ために", "のように", "にために"),
+            pick("日本語がもっと上手に話せる＿＿、毎日ニュースを聞いています。", "I listen to the news every day so that I can speak Japanese better.", "ように", "ために", "ためで", "そうに"),
+            pick("A：どうしてそんなに一生懸命働いているの？\nB：子ども＿＿、少しでもお金を残しておきたいんだ。", "A: Why are you working so hard? B: I want to leave at least a little money for my kids.", "のために", "のように", "にために", "ために"),
+            build("My older sister moved to Osaka to work at a design company.", "姉/t は/t デザイン会社/p で/p 働く/v ために、/c 大阪/g に/g 引っ越しました。/v", extra: "ように", "働ける"),
+            build("Because of the accident, the road was closed for three hours.", "事故/s の/c ために、/c 道路/s が/s 三時間/tm 通行止めに/v なりました。/v", extra: "ように", "を"),
+            say("I'm working part-time and saving money in order to study at a university in Japan.", "日本の大学で勉強するために、アルバイトをしてお金を貯めています", "日本の大学で勉強するために、バイトしてお金を貯めています", "日本の大学で勉強するために、アルバイトをしてお金をためている"),
+            say("Because of the typhoon, all of today's flights to Okinawa were cancelled.", "台風のために、今日の沖縄行きの飛行機は全部欠航になりました", "台風のため、今日の沖縄行きの便はすべて欠航になりました", "台風のために、今日の沖縄行きの飛行機は全部キャンセルになった")
+        ),
+        lesson(
+            "n3.1.2", "〜ように (so that)", "so that / so as not to",
+            form: "Potential or non-volitional verb (dictionary form) + ように; Verb ない-form + ように",
+            note: "ように gives a goal you can't directly control: so that something happens or becomes possible. It goes with potential forms (話せるように), non-volitional verbs (わかる, 見える, 治る) and negatives (忘れないように). ために needs a volitional verb and the same subject, so 留学するために is right but 聞こえるために is wrong. When the two halves have different subjects, ように is the only choice: 後ろの人にも聞こえるように大きな声で話す. Don't confuse it with ようになる (come to be able to) or ようにする (make a point of).",
+            examples: [("風邪をひかないように、毎朝うがいをしています。", "I gargle every morning so I don't catch a cold."), ("子どもでも読めるように、漢字にふりがなをつけました。", "I added furigana to the kanji so that even kids can read it.")],
+            keywords: ["ように", "so that", "ないように", "ために vs ように"],
+            pick("後ろの席の人にも＿＿、大きな声で話してください。", "Please speak up so the people in the back seats can hear too.", "聞こえるように", "聞こえるために", "聞くように", "聞こえように"),
+            pick("大事な約束を＿＿、スマホのカレンダーに入れておいた。", "I put the important appointment in my phone's calendar so I wouldn't forget it.", "忘れないように", "忘れるように", "忘れなかったように", "忘れずように"),
+            pick("留学する＿＿、毎月少しずつお金を貯めている。", "I'm putting a little money aside every month in order to study abroad.", "ために", "ように", "ための", "ようと"),
+            pick("A：風邪、まだ治らないの？\nB：うん。早く＿＿、今日はもう寝るよ。", "A: You're still not over your cold? B: No. I'm going to bed now so it gets better soon.", "治るように", "治るために", "治ったように", "治るような"),
+            build("I set two alarms so that I don't oversleep tomorrow.", "明日/tm 寝坊しない/v ように、/c 目覚まし/o を/o 二つ/o かけました。/v", extra: "ために", "寝坊する"),
+            build("I explained it in simple Japanese so that even beginners could understand.", "初心者/s でも/s わかる/v ように、/c 簡単な/d 日本語/d で/d 説明しました。/v", extra: "ために"),
+            say("I write new words in a notebook every day so that I won't forget them.", "忘れないように、毎日新しい単語をノートに書いています", "新しい単語を忘れないように、毎日ノートに書いています", "忘れないように、毎日新しい言葉をノートに書いている"),
+            say("I'm practicing every day so that I can play this song at my friend's wedding.", "友達の結婚式でこの曲が弾けるように、毎日練習しています", "友達の結婚式でこの曲を弾けるように、毎日練習しています", "友達の結婚式でこの曲が弾けるように、毎日練習している")
+        ),
+        lesson(
+            "n3.1.3", "〜はずだ", "should be / is expected to",
+            form: "Plain form + はずだ (な-adj + な, Noun + の + はずだ); はずがない (no way); はずだった (was supposed to)",
+            note: "はずだ states what you expect based on evidence or logic: 荷物は明日届くはずだ (it should arrive tomorrow, the tracking says so). It's not about duty: べきだ means \"ought to\" (it's the right thing to do), so 行くべきだ is advice while 行くはずだ is a prediction. でしょう is a vaguer guess with no reasoning behind it. はずがない means \"there's no way\", and はずだった means \"was supposed to (but didn't)\". In conversation it's often はずなんだけど or just はず.",
+            examples: [("会議は三時からのはずです。", "The meeting should be from three."), ("鍵はかけたはずなのに、ドアが開いていた。", "I'm sure I locked it, but the door was open."), ("あの真面目な田中さんが遅刻するはずがない。", "There's no way serious Tanaka would be late.")],
+            keywords: ["はず", "はずがない", "should be", "expectation"],
+            pick("田中さんは十年もアメリカに住んでいたから、英語が＿＿。", "Tanaka lived in America for ten years, so his English should be good.", "上手なはずだ", "上手のはずだ", "上手はずだ", "上手なべきだ"),
+            pick("A：鈴木さん、まだ来ないね。\nB：三時の新幹線に乗ったって言ってたから、もうすぐ＿＿よ。", "A: Suzuki still isn't here. B: He said he got on the 3:00 shinkansen, so he should arrive any minute.", "着くはずだ", "着くべきだ", "着いたはずだ", "着くはずがない"),
+            pick("あんなに優しい彼が、そんなひどいことを言う＿＿。", "There's no way someone as kind as him would say something that awful.", "はずがない", "はずだ", "わけだ", "べきではない"),
+            pick("本当は昨日帰国する＿＿が、飛行機が欠航になってしまった。", "I was supposed to fly home yesterday, but my flight got cancelled.", "はずだった", "はずだ", "はずがなかった", "べきだった"),
+            build("I put it in there this morning, so the key should be in the drawer.", "今朝/tm 入れた/v から、/c 鍵/t は/t 引き出しの中/p に/p ある/v はずだ。/e", extra: "べきだ", "で"),
+            build("That store is closed on Mondays, so there's no way it's open today.", "あの店/t は/t 月曜日/s が/s 休み/v だから、/c 今日/tm 開いている/v はずがない。/e", extra: "はずだ", "べき"),
+            say("The package I ordered last week should arrive by tomorrow.", "先週注文した荷物は明日までに届くはずです", "先週注文した荷物は明日までに届くはずだ", "先週頼んだ荷物は明日までに届くはずです"),
+            say("He studied every day for a whole year, so there's no way he'll fail the exam.", "彼は一年間毎日勉強したから、試験に落ちるはずがない", "彼は一年間毎日勉強したので、試験に落ちるはずがありません", "一年間毎日勉強したんだから、試験に落ちるはずがない")
+        ),
+        lesson(
+            "n3.1.4", "〜わけだ", "no wonder / so that means",
+            form: "Plain form + わけだ (な-adj + な, Noun + の / という + わけだ)",
+            note: "わけだ draws a conclusion that follows naturally from facts you've just learned: \"no wonder\" or \"so that means\". It often comes with どうりで or だから: 毎日練習しているのか。上手なわけだ. Compare はずだ, which mostly predicts something you haven't confirmed yet, while わけだ explains something you already know is true. It also restates a consequence: 三人休むから、四人で回すわけだ (so that means four of us cover it). In conversation it's often わけね or わけか, and don't mix it up with わけではない (it's not that...).",
+            examples: [("エアコンが壊れているのか。どうりで暑いわけだ。", "Oh, the air conditioner is broken. No wonder it's hot."), ("一日三十ページ読めば、十日で読み終わるわけだ。", "If I read thirty pages a day, that means I'll finish in ten days.")],
+            keywords: ["わけだ", "no wonder", "どうりで", "conclusion"],
+            pick("A：彼女、十年もフランスに住んでたんだって。\nB：へえ、フランス語がペラペラな＿＿。", "A: Apparently she lived in France for ten years. B: Huh, no wonder her French is fluent.", "わけだ", "わけがない", "ようだ", "ところだ"),
+            pick("一時間に二十キロ走るんだから、三時間で六十キロ進む＿＿。", "You do twenty kilometers an hour, so that means you'll cover sixty in three hours.", "わけだ", "わけではない", "ばかりだ", "ところだ"),
+            pick("エアコンが壊れているのか。どうりで部屋が＿＿。", "So the air conditioner is broken. No wonder the room is so hot.", "暑いわけだ", "暑いなわけだ", "暑くわけだ", "暑いわけがない"),
+            pick("A：来月から残業がなくなるらしいよ。\nB：じゃあ、給料が少し減る＿＿ね。", "A: Apparently there'll be no more overtime from next month. B: So that means our pay will go down a bit.", "わけだ", "わけがない", "ばかりだ", "ところだ"),
+            build("She worked at a hotel in London for five years, so no wonder her English is good.", "彼女/t は/t ロンドンのホテル/p で/p 五年/tm 働いていた/v から、/c 英語/s が/s 上手な/v わけだ。/e", extra: "はずがない", "上手だ"),
+            build("The meeting was pushed back to Friday, so that means we got two more days to prepare.", "会議/s が/s 金曜日/g に/g 延びた/v から、/c 準備の/d 時間/s が/s 二日/d 増えた/v わけだ。/e", extra: "わけではない"),
+            say("He's been living alone for ten years, so no wonder he's good at cooking.", "彼は十年も一人暮らしをしているから、料理が上手なわけだ", "彼は十年間一人暮らしをしているから、料理が上手なわけです", "十年も一人暮らししてるんだから、料理が上手なわけだ"),
+            say("The train was stopped for an hour, so that's why everyone was late this morning.", "電車が一時間止まっていたから、今朝みんな遅刻したわけだ", "電車が一時間止まっていたので、今朝みんな遅れたわけです", "電車が一時間も止まっていたから、今朝はみんな遅刻したわけだ")
+        ),
+        lesson(
+            "n3.1.5", "〜わけではない", "it's not that... / doesn't necessarily mean",
+            form: "Plain form + わけではない (な-adj + な, Noun + の / という + わけではない); casual: わけじゃない",
+            note: "わけではない denies a conclusion the listener might draw, or softens what you just said: 嫌いなわけではない (it's not that I dislike it). With いつも, 全部 or 必ずしも it makes a partial negative: 高い店がいつもおいしいわけではない (pricey places aren't always good). わけがない is completely different: a flat \"there's no way\", like はずがない. The classic mistake is using わけではない as a plain negative: 肉を食べないわけではない actually means you DO eat meat sometimes. Casual: わけじゃない; わけでもない adds \"nor is it that\".",
+            examples: [("お酒が飲めないわけではないが、あまり好きじゃない。", "It's not that I can't drink, but I don't really like it."), ("日本人だからといって、みんな着物が着られるわけではない。", "Just because someone's Japanese doesn't mean they can all put on a kimono.")],
+            keywords: ["わけではない", "わけじゃない", "わけがない", "partial negation"],
+            pick("A：パーティー、行かないの？ 佐藤さんのこと嫌いなの？\nB：いや、嫌いな＿＿。ちょっと疲れてるだけ。", "A: You're not going to the party? Do you not like Sato? B: No, it's not that I don't like her. I'm just a bit tired.", "わけじゃない", "わけがない", "はずじゃない", "わけだ"),
+            pick("こんな簡単な問題、彼が間違える＿＿。", "There's no way he'd get a question this easy wrong.", "わけがない", "わけではない", "わけだ", "ばかりだ"),
+            pick("日本人だからといって、みんな敬語が上手に使える＿＿。", "Just because someone is Japanese doesn't mean they can all use keigo well.", "わけではない", "わけがない", "わけだ", "はずだ"),
+            pick("この仕事が＿＿わけではないが、もっと給料のいい会社に移りたい。", "It's not that I dislike this job, but I'd like to move to a company that pays better.", "嫌いな", "嫌い", "嫌いの", "嫌いだ"),
+            build("It's not that I don't want to go, but I don't have time this week.", "行きたくない/v わけではない/e けど、/c 今週/t は/t 時間/s が/s ない。/v", extra: "わけがない", "行きたい"),
+            build("Expensive restaurants aren't always delicious.", "値段の/d 高い/d レストラン/s が/s いつも/d おいしい/v わけではない。/e", extra: "わけがない"),
+            say("It's not that I can't eat raw fish, but I don't really like it.", "生の魚が食べられないわけではないけど、あまり好きじゃない", "生魚が食べられないわけじゃないけど、あまり好きではありません", "刺身が食べられないわけではないけど、あまり好きじゃない"),
+            say("Just because you live in Japan doesn't mean your Japanese will automatically get better.", "日本に住んでいるからといって、日本語が自然に上手になるわけではない", "日本に住んでいるからって、日本語が自然に上手になるわけじゃない", "日本に住んでいても、日本語が自動的に上手になるわけではない")
+        ),
+        lesson(
+            "n3.1.6", "〜ばかり", "nothing but / only (too much)",
+            form: "Noun + ばかり (が・を usually dropped; ばかりで, ばかりの); Verb て-form + ばかりいる",
+            note: "ばかり says there's too much of one thing, usually with a complaining tone: 弟はゲームばかりしている (does nothing but play games). With verbs, use the て-form + ばかりいる: 寝てばかりいる, 文句を言ってばかりいる. だけ is a neutral \"only\" with no criticism (三千円だけ = just 3,000 yen), while ばかり means \"all this and nothing else\". Don't confuse it with たばかり (just did), which attaches to the past tense. In casual speech it's often ばっかり or ばっか.",
+            examples: [("最近、雨ばかりで嫌になる。", "It's been nothing but rain lately, and I'm sick of it."), ("彼は文句を言ってばかりいて、全然手伝わない。", "He just complains all the time and never helps.")],
+            keywords: ["ばかり", "ばっかり", "てばかりいる", "nothing but"],
+            pick("うちの息子は全然勉強しないで、ゲーム＿＿している。", "My son doesn't study at all; he does nothing but play games.", "ばかり", "しか", "ばかりに", "ほど"),
+            pick("彼女は最近、泣いて＿＿いる。何かあったのかな。", "She's been crying all the time lately. I wonder if something happened.", "ばかり", "だけ", "ばかりで", "しか"),
+            pick("このかばん、全然高くなかったよ。三千円＿＿だった。", "This bag wasn't expensive at all. It was only 3,000 yen.", "だけ", "ばかり", "しか", "ばかりで"),
+            pick("テレビを＿＿いないで、少しは手伝ってよ。", "Stop just watching TV and help out a little.", "見てばかり", "見るばかり", "見たばかり", "見ばかり"),
+            build("My roommate does nothing but complain, so I'm thinking of moving out.", "ルームメイト/s が/s 文句/o を/o 言って/v ばかり/v いる/v ので、/c 引っ越そう/v と思っている。/e", extra: "だけ", "言った"),
+            build("I'm busy this month, so I've been eating nothing but convenience store bento.", "今月/tm は/tm 忙しくて、/c コンビニの/d 弁当/o ばかり/o 食べています。/v", extra: "しか"),
+            say("On his days off my younger brother just sleeps all day and never helps with the housework.", "弟は休みの日は一日中寝てばかりいて、全然家事を手伝わない", "弟は休みの日に一日中寝てばかりいて、家事を全然手伝わない", "弟は休みの日は寝てばかりで、全然家事を手伝わない"),
+            say("Lately it's been nothing but rain, so my laundry won't dry.", "最近雨ばかりで、洗濯物が乾かない", "最近は雨ばかりで、洗濯物が乾きません", "最近雨ばっかりで、洗濯物が乾かない")
+        ),
+    ], level: "N3")
+
+    // MARK: - Unit 15
+
+    static let unit15 = CourseUnit(id: 15, title: "Time and change", summary: "うちに, ところだ, たばかり, ようとする, ことにする／なる, ば〜ほど", lessons: [
+        lesson(
+            "n3.2.1", "〜うちに", "while (before it changes) / before",
+            form: "Verb dictionary / ている / ない form + うちに; い-adj + うちに; な-adj + な + うちに; Noun + の + うちに",
+            note: "うちに means \"while this state lasts\": do it now, before the situation changes. 若いうちに, 温かいうちに, 日本にいるうちに. With a negative, ないうちに works like English \"before\": 暗くならないうちに帰ろう. 間に is just \"during a period\" with no sense of urgency, and 前に is simply \"before\" a point in time. うちに can also describe a change you didn't notice happening: 話しているうちに仲良くなった. The classic mistake is putting a past form in front (食べたうちに): it's always non-past.",
+            examples: [("冷めないうちに食べてください。", "Please eat it before it gets cold."), ("学生のうちに、いろいろな国に行っておきたい。", "I want to go to lots of countries while I'm still a student."), ("何度も聞いているうちに、歌詞を覚えてしまった。", "While listening to it over and over, I ended up memorizing the lyrics.")],
+            keywords: ["うちに", "ないうちに", "while", "before it changes"],
+            pick("スープが＿＿うちに、どうぞ召し上がってください。", "Please have the soup while it's still hot.", "温かい", "温かかった", "温かく", "温かいの"),
+            pick("A：もう五時だよ。\nB：じゃあ、暗く＿＿うちに帰ろうか。", "A: It's already five. B: Then shall we head home before it gets dark?", "ならない", "なる", "なった", "なって"),
+            pick("両親が元気な＿＿、一緒に海外旅行に行きたい。", "I want to travel abroad with my parents while they're still healthy.", "うちに", "前に", "後で", "ところに"),
+            pick("毎日彼と話している＿＿、だんだん好きになってしまった。", "Talking with him every day, I gradually found myself falling for him.", "うちに", "前に", "ところで", "ばかりに"),
+            build("I want to visit Kyoto while I'm in Japan as an exchange student.", "留学生として/d 日本/p に/p いる/v うちに、/c 京都/g に/g 行ってみたい。/v", extra: "前に"),
+            build("Let's bring the laundry in before it starts raining.", "雨/s が/s 降らない/v うちに、/c 洗濯物/o を/o 取り込もう。/v", extra: "降る", "降った"),
+            say("You should learn a foreign language while you're still young and have lots of time.", "若くて時間があるうちに、外国語を勉強したほうがいい", "若くて時間がたくさんあるうちに、外国語を勉強したほうがいいよ", "若くて時間があるうちに、外国語を習ったほうがいいです"),
+            say("I want to see the cherry blossoms in Kyoto before they fall, so I'm going this weekend.", "桜が散らないうちに京都で見たいから、今週末行きます", "散らないうちに京都の桜を見たいので、今週末行きます", "桜が散らないうちに京都で花見がしたいから、今週末に行く")
+        ),
+        lesson(
+            "n3.2.2", "〜ところだ", "about to / in the middle of / just did",
+            form: "Dictionary form + ところだ (about to); ている + ところだ (in the middle of); た-form + ところだ (just did)",
+            note: "ところ is a point in a process, and the verb form before it picks the point: 出かけるところだ (about to leave), 準備しているところだ (in the middle of getting ready), 帰ってきたところだ (just got back). It's about where you are right now, so it's common when explaining why you can't talk. たところ means a moment ago, objectively; たばかり can stretch to weeks if it still feels recent. ところに / ところへ means \"just as\": 出かけようとしたところに電話が来た. Don't use ところだ for plans further off: that's つもりだ or 予定だ.",
+            examples: [("今、駅に向かっているところです。", "I'm on my way to the station right now."), ("ちょうど晩ご飯を食べ終わったところだ。", "I've just finished dinner."), ("これから会議が始まるところなので、後で電話します。", "A meeting is just about to start, so I'll call you later.")],
+            keywords: ["ところだ", "たところ", "ているところ", "about to"],
+            pick("A：もしもし、今ちょっといい？\nB：ごめん、今ご飯を＿＿ところなんだ。後でかけ直すね。", "A: Hello, got a minute? B: Sorry, I'm in the middle of eating. I'll call you back later.", "食べている", "食べる", "食べた", "食べて"),
+            pick("A：もう出発した？\nB：ううん、これから家を＿＿ところ。", "A: Have you left yet? B: No, I'm just about to head out the door.", "出る", "出た", "出ている", "出よう"),
+            pick("ちょうど今、駅に＿＿ところです。どこにいますか。", "I've just this moment arrived at the station. Where are you?", "着いた", "着く", "着いている", "着いて"),
+            pick("出かけようとした＿＿、急に雨が降ってきた。", "Just as I was about to go out, it suddenly started raining.", "ところに", "うちに", "ばかりに", "はずに"),
+            build("I'm about to get in the bath, so can you call me back in thirty minutes?", "今から/tm お風呂/g に/g 入る/v ところ/e だから、/c 三十分後/tm に/tm かけ直してくれる？/v", extra: "入った", "入っている"),
+            build("When I got home, my mother was in the middle of making dinner.", "家/g に/g 帰ったら、/c 母/s が/s 晩ご飯/o を/o 作っている/v ところだった。/e", extra: "作った", "作る"),
+            say("I've just finished writing my report, so now I'm about to send it to my boss.", "レポートを書き終わったところなので、これから上司に送るところです", "レポートを書き終えたところだから、今から上司に送るところだ", "今レポートを書き終わったところなので、これから上司に送るところです"),
+            say("When you called, I was in the middle of a meeting, so I couldn't answer.", "電話をもらった時、会議をしているところだったので、出られませんでした", "電話をくれた時、会議に出ているところだったから、出られなかった", "電話をもらったとき、会議をしているところだったので、出られなかった")
+        ),
+        lesson(
+            "n3.2.3", "〜たばかり", "just did (and it still feels recent)",
+            form: "Verb た-form + ばかりだ; たばかりの + Noun; たばかりなのに / なので",
+            note: "たばかり means \"just did\" from the speaker's point of view: 先月入社したばかりです can be said weeks later, because it still feels new. たところ is the objective \"just this moment\" and can't stretch that far, so 三か月前に買ったところ is wrong. たばかり behaves like a noun, so you get たばかりなのに (even though I only just...), たばかりなので and たばかりの + noun (買ったばかりの靴). Don't mix it up with Noun + ばかり or てばかりいる (nothing but). Casual: たばっか.",
+            examples: [("日本に来たばかりなので、まだ電車の乗り方がよくわからない。", "I've only just come to Japan, so I still don't really get how the trains work."), ("買ったばかりのパソコンが、もう動かなくなった。", "The computer I just bought has already stopped working.")],
+            keywords: ["たばかり", "just did", "たところ vs たばかり"],
+            pick("＿＿ばかりの靴が、雨でびしょびしょになってしまった。", "The shoes I'd just bought got soaked in the rain.", "買った", "買う", "買って", "買っている"),
+            pick("この車は三か月前に＿＿なのに、もう故障した。", "I only bought this car three months ago, and it's already broken down.", "買ったばかり", "買ったところ", "買うところ", "買ってばかり"),
+            pick("A：日本の生活にはもう慣れた？\nB：いや、まだ先週＿＿だから、わからないことばかりだよ。", "A: Used to life in Japan yet? B: No, I only got here last week, so there's still loads I don't know.", "来たばかり", "来たところ", "来るばかり", "来てばかり"),
+            pick("さっき＿＿のに、もうお腹がすいた。", "I ate just a little while ago, but I'm already hungry.", "食べたばかりな", "食べたばかり", "食べたばかりの", "食べるばかりな"),
+            build("I've only just joined this company, so I don't know anyone yet.", "この会社/g に/g 入った/v ばかり/e なので、/c まだ/d 知り合い/s が/s いません。/v", extra: "ところ", "入る"),
+            build("My sister, who just got her license, drove us to the beach.", "免許/o を/o 取った/d ばかりの/d 姉/s が/s 海/g まで/g 運転してくれた。/v", extra: "ところの", "取る"),
+            say("I only just got back from a business trip, but I have to go to Osaka again tomorrow.", "出張から帰ってきたばかりなのに、明日また大阪に行かなければならない", "出張から帰ったばかりなのに、明日また大阪に行かないといけない", "出張から帰ってきたばかりなのに、明日また大阪へ行かなきゃいけない"),
+            say("I only bought this smartphone last month, but the screen has already cracked.", "このスマホは先月買ったばかりなのに、もう画面が割れてしまった", "先月買ったばかりのスマホなのに、もう画面が割れた", "このスマホは先月買ったばかりなのに、もう画面が割れちゃった")
+        ),
+        lesson(
+            "n3.2.4", "〜ようとする", "try to / be about to",
+            form: "Volitional form + とする (食べようとする, 起きようとする, しようとする, 来ようとする); ようとしない (refuses to)",
+            note: "Volitional + とする means you attempt something or are on the verge of doing it: ドアを開けようとした (tried to open the door). It's often followed by a failure or an interruption: 寝ようとしたら電話が鳴った. てみる is different: you actually do it to see what it's like (食べてみた = I tried it, I ate it), whereas 食べようとした means you tried but may not have managed. With things rather than people it means \"about to\": 電車が出ようとしている. ようとしない means \"won't, refuses to\": 息子は野菜を食べようとしない.",
+            examples: [("寝ようとしたら、隣の部屋から大きな音がした。", "Just as I was about to fall asleep, there was a loud noise from next door."), ("何度言っても、彼は謝ろうとしない。", "No matter how many times I tell him, he refuses to apologize.")],
+            keywords: ["ようとする", "volitional form", "try to", "てみる vs ようとする"],
+            pick("家を＿＿としたら、急に雨が降ってきた。", "Just as I was about to leave the house, it suddenly started raining.", "出よう", "出る", "出て", "出た"),
+            pick("A：あの店のカレー、食べた？\nB：うん、昨日初めて＿＿。すごく辛かったけど、おいしかったよ。", "A: Have you had the curry at that place? B: Yeah, I tried it for the first time yesterday. Really spicy, but good.", "食べてみた", "食べようとした", "食べようとする", "食べてみようとした"),
+            pick("何度説明しても、彼は私の話を＿＿。", "No matter how many times I explain, he refuses to listen to me.", "聞こうとしない", "聞いてみない", "聞こうとする", "聞くとしない"),
+            pick("息子はやっと自分で宿題を＿＿としている。", "My son is finally trying to do his homework by himself.", "しよう", "するよう", "すよう", "させよう"),
+            build("When I tried to open the old window, it was stuck and wouldn't budge at all.", "古い/d 窓/o を/o 開けよう/v と/v したら、/c 固くて/c 全然/d 動かなかった。/v", extra: "開ける", "ばかり"),
+            build("Just as the train was about to leave, a man came running onto the platform.", "電車/s が/s 出発しよう/v と/v している/v 時、/c 男の人/s が/s ホーム/g に/g 走ってきた。/v", extra: "出発する"),
+            say("I was about to go to bed when a friend called, and we talked until two.", "寝ようとしたら友達から電話がかかってきて、二時まで話した", "寝ようとした時に友達から電話が来て、二時まで話していた", "寝ようとしたら、友達から電話がかかってきて二時まで話しました"),
+            say("No matter how many times I call it, my cat refuses to come anywhere near me.", "何度呼んでも、うちの猫は私に近づこうとしない", "何回呼んでも、猫は私のそばに来ようとしない", "何度呼んでも、うちの猫は近づこうとしません")
+        ),
+        lesson(
+            "n3.2.5", "〜ことにする／〜ことになる", "decide to / it's been decided",
+            form: "Dictionary or ない-form + ことにする (I decide) / ことになる (it's decided, it's arranged); ことにしている (personal rule); ことになっている (rule, schedule)",
+            note: "ことにする is a decision you make yourself: 来年留学することにした. ことになる presents it as decided by circumstances or by someone else, which sounds more modest, so it's standard for work news: 来月から大阪に転勤することになりました. ことにしている is a personal rule you keep (毎朝走ることにしている), while ことになっている is an outside rule or plan (ここではタバコを吸わないことになっている). Don't confuse ことにする (a firm decision) with ようにする (make an effort, try to): 早く寝るようにしている is a goal you aim for, not a fixed rule.",
+            examples: [("いろいろ考えて、会社を辞めることにしました。", "After a lot of thought, I decided to quit my job."), ("来週から新しいプロジェクトを担当することになった。", "It's been decided that I'll be in charge of a new project from next week."), ("寝る前にはコーヒーを飲まないことにしている。", "I make it a rule not to drink coffee before bed.")],
+            keywords: ["ことにする", "ことになる", "ことにしている", "decide"],
+            pick("A：最近、エレベーターを使わないね。\nB：うん、健康のために、三階までは階段を使う＿＿んだ。", "A: You never take the elevator these days. B: Yeah, for my health I've made it a rule to take the stairs up to the third floor.", "ことにしている", "ことになっている", "ことになる", "ことがある"),
+            pick("会社の規則で、会議室では食事をしない＿＿。", "Under company rules, you're not supposed to eat in the meeting rooms.", "ことになっている", "ことにしている", "ことにする", "ことがある"),
+            pick("来月から、父の仕事の都合で福岡に引っ越す＿＿。", "Because of my dad's job, it's been decided that we're moving to Fukuoka next month.", "ことになりました", "ことにしました", "ことにしています", "ようにしました"),
+            pick("いろいろ考えたけど、今年は実家に帰らない＿＿。", "I thought it over a lot, but I've decided not to go home to my parents' this year.", "ことにした", "ようにした", "ことにしない", "ことがある"),
+            build("After talking it over with my family, I decided to quit my job and go back to university.", "家族/g と/g 相談して、/c 仕事/o を/o 辞めて/v 大学/g に/g 戻る/v ことにしました。/e", extra: "ようにしました", "が"),
+            build("In our dorm, you're supposed to be back by eleven at night.", "うちの寮/p では、/p 夜十一時/tm までに/tm 帰る/v ことに/e なっている。/e", extra: "している"),
+            say("I've made it a rule not to look at my phone for an hour before going to bed.", "寝る前の一時間はスマホを見ないことにしている", "寝る前の一時間はスマホを見ないことにしています", "寝る一時間前からスマホを見ないことにしている"),
+            say("It's been decided that I'll be transferred to the Osaka branch starting in April.", "四月から大阪支社に転勤することになりました", "四月から大阪支店に転勤することになった", "四月から大阪の支社に転勤することになりました")
+        ),
+        lesson(
+            "n3.2.6", "〜ば〜ほど", "the more..., the more...",
+            form: "Verb ば-form + same verb (dictionary) + ほど; い-adj ければ + い-adj + ほど; な-adj なら + な-adj + な + ほど",
+            note: "ば〜ほど links two things that change together: 練習すれば練習するほど上手になる. The same word appears twice, first in the ば-form and then in the plain non-past + ほど; with する verbs the second half can be just するほど (勉強すればするほど). You can drop the ば half and use ほど alone (考えるほどわからなくなる), which sounds a little lighter. The second half describes a change or a general tendency, so it usually ends in なる, the non-past, or a general truth. Classic mistakes: たら or と instead of ば (食べたら食べるほど), the past before ほど, and forgetting な with な-adjectives (便利なら便利なほど).",
+            examples: [("この本は読めば読むほど面白くなる。", "The more you read this book, the more interesting it gets."), ("部屋は広ければ広いほどいいけど、家賃が高くなる。", "The bigger the room the better, but the rent goes up.")],
+            keywords: ["ば〜ほど", "ほど", "the more", "ばほど"],
+            pick("日本語は勉強＿＿勉強するほど、難しく感じる。", "The more I study Japanese, the harder it feels.", "すれば", "したら", "すると", "して"),
+            pick("部屋は＿＿広いほどいいけど、そのぶん家賃が高くなる。", "The bigger the room the better, but the rent goes up accordingly.", "広ければ", "広かったら", "広くて", "広いと"),
+            pick("パソコンは操作が簡単なら簡単＿＿、お年寄りにも使いやすい。", "The simpler a computer is to operate, the easier it is for older people to use.", "なほど", "ほど", "のほど", "だほど"),
+            pick("A：このワイン、すごく古いね。きっとおいしいよ。\nB：ワインは古ければ古い＿＿おいしいとは限らないよ。", "A: This wine is really old. It must be good. B: It's not always the case that the older a wine is, the better it tastes.", "ほど", "ばかり", "うちに", "まで"),
+            build("The more I thought about his words, the less I understood them.", "彼の/d 言葉/t は/t 考えれば/c 考える/c ほど、/c わからなく/v なった。/v", extra: "考えたら", "考えた"),
+            build("Hotel bookings are cheaper the earlier you make them, so let's book it now.", "ホテルの/d 予約/t は/t 早ければ/c 早い/c ほど/c 安い/v から、/c 今/tm 取っておこう。/v", extra: "早かったら"),
+            say("The more you practice speaking, the more natural your Japanese will become.", "話す練習をすればするほど、日本語が自然になる", "話す練習をすればするほど、日本語が自然になります", "会話の練習をすればするほど、日本語は自然になる"),
+            say("The closer an apartment is to the station, the more convenient it is, but the rent is higher too.", "駅に近ければ近いほど便利だけど、家賃も高い", "駅から近ければ近いほど便利ですが、家賃も高くなります", "駅に近ければ近いほど便利だが、家賃も高くなる")
+        ),
+    ], level: "N3")
+}

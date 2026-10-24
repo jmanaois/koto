@@ -2,7 +2,7 @@ import Foundation
 
 /// The N5 grammar course, in roughly Genki I order. Lesson ids are stored in progress records,
 /// so never change one; add new lessons with new ids.
-nonisolated enum N5Course {
+nonisolated enum N5Course: CourseWriting {
     static let units: [CourseUnit] = [unit1, unit2, unit3, unit4, unit5]
 
     // MARK: - Unit 1

@@ -1,0 +1,193 @@
+import Foundation
+
+nonisolated extension N3Course {
+    // MARK: - Unit 16
+
+    static let unit16 = CourseUnit(id: 16, title: "Viewpoint and emphasis", summary: "にとって, について, によって, として, さえ, くせに", lessons: [
+        lesson(
+            "n3.3.1", "〜にとって", "for / from the standpoint of",
+            form: "Noun + にとって (にとっては / にとっても; Noun + にとっての + Noun)",
+            note: "にとって gives the person or group from whose point of view something is judged: 私にとって大切な人 (someone important to me). What follows is an evaluation: 大切だ, 難しい, 便利だ, 問題だ. For an action or attitude aimed at someone (厳しい, 親切だ, 反対する), use に対して instead: 学生に対して厳しい = strict toward students. The classic mistake is 私にとって + an opinion verb (私にとって、〜と思う); for \"speaking for myself\" use 私としては.",
+            examples: [("この写真は、私にとって一番大切な宝物です。", "This photo is my most precious treasure."), ("外国人にとって、敬語はかなり難しい。", "For foreigners, honorific language is pretty hard."), ("部長は部下に対しては厳しいが、お客さんにはとても優しい。", "The manager is strict with his staff, but very kind to customers.")],
+            keywords: ["にとって", "for me", "に対して", "from the standpoint of"],
+            pick("一人暮らしを始めたばかりの学生＿＿、家賃が一番大きな問題だ。", "For students who've just started living alone, rent is the biggest problem.", "にとって", "に対して", "について", "によって"),
+            pick("山田先生は、遅刻する学生＿＿とても厳しい。", "Professor Yamada is very strict toward students who come late.", "に対して", "にとって", "について", "として"),
+            pick("A：このアプリ、そんなに便利？\nB：うん、毎日電車で通勤している人＿＿、かなり便利だと思うよ。", "A: Is this app really that handy? B: Yeah, for people who commute by train every day, I think it's really handy.", "にとって", "に対して", "について", "によって"),
+            pick("これは日本人＿＿当たり前のことでも、外国人には不思議に見えるかもしれない。", "Even if this is perfectly normal for Japanese people, it might look strange to foreigners.", "にとっては", "に対しては", "についての", "によっては"),
+            build("For me, the most important thing is the time I spend with my family.", "私/t にとって/t 一番/d 大切な/d のは/t 家族と/d 過ごす/d 時間です。/v", extra: "に対して"),
+            build("It was my daughter's first trip abroad, so she was nervous the whole time.", "娘/t にとって/t 初めての/d 海外旅行/v だった/v ので、/c ずっと/d 緊張していた。/v", extra: "に対して", "初めて"),
+            say("For people who live in the countryside, a car is something they can't live without.", "田舎に住んでいる人にとって、車はなくてはならないものです", "田舎に住んでいる人にとって車はなくてはならないものだ", "田舎に住む人にとって、車はなくてはならないものです"),
+            say("For me, this was the hardest exam I've ever taken.", "私にとって、これは今まで受けた中で一番難しい試験でした", "私にとって、これは今まで受けた試験の中で一番難しかったです", "僕にとって、これは今までで一番難しい試験だった")
+        ),
+        lesson(
+            "n3.3.2", "〜について", "about / concerning",
+            form: "Noun + について + Verb (話す, 考える, 調べる…); Noun + についての + Noun",
+            note: "について marks the subject matter of talking, thinking, writing or researching: 日本の歴史について調べる. Before a noun it needs の: 環境についての本 (a book about the environment), never 環境について本. Don't mix it up with に対して, which is an attitude or reaction aimed at something (上司に対して遠慮する), or にとって, which is whose point of view. In formal writing you'll see に関して / に関する + noun with the same meaning.",
+            examples: [("卒業論文では、日本の若者の働き方について書くつもりです。", "In my graduation thesis, I'm planning to write about how young people in Japan work."), ("来週の会議についてのメール、もう読んだ？", "Have you read the email about next week's meeting yet?")],
+            keywords: ["について", "についての", "about", "に関して"],
+            pick("昨日の授業では、地球温暖化＿＿グループで話し合った。", "In yesterday's class we discussed global warming in groups.", "について", "についての", "に対して", "にとって"),
+            pick("駅前にできた新しい店＿＿噂、聞いたことある？", "Have you heard the rumor about the new shop that opened in front of the station?", "についての", "について", "にとっての", "によっての"),
+            pick("彼女は自分の意見をはっきり言う人で、上司＿＿も遠慮しない。", "She says exactly what she thinks, and doesn't hold back even toward her boss.", "に対して", "について", "にとって", "として"),
+            pick("A：論文のテーマ、もう決まった？\nB：うん、日本のアニメが海外でどう受け入れられているか＿＿書こうと思ってる。", "A: Have you decided on your thesis topic? B: Yeah, I'm thinking of writing about how Japanese anime is received abroad.", "について", "についての", "に対して", "にとって"),
+            build("Yesterday I read an article written about the history of this town.", "昨日、/tm この/d 町の/d 歴史/d について/d 書かれた/d 記事を/o 読んだ。/v", extra: "についての", "書いた"),
+            build("Could you tell me a little more about next week's schedule?", "来週の/d スケジュール/o について、/o もう少し/d 詳しく/d 教えて/v もらえません/v か。/e", extra: "についての", "くれ"),
+            say("At the meeting, we discussed the town's garbage problem for two hours.", "会議で町のゴミの問題について二時間話し合いました", "会議で、町のゴミ問題について二時間話し合った", "会議では町のごみの問題について2時間話し合いました"),
+            say("Is there a book about Japanese history that even beginners can read?", "初心者でも読める日本の歴史についての本はありますか", "初心者でも読める、日本の歴史についての本はありませんか", "初心者でも読める日本の歴史についての本はある")
+        ),
+        lesson(
+            "n3.3.3", "〜によって", "depending on / by (passive agent) / due to",
+            form: "Noun + によって / によっては (depending on); Passive verb with agent + によって; Noun + による + Noun",
+            note: "によって has three jobs. \"Depending on\": 人によって考え方が違う, and によっては means \"in some cases\": 天気によっては中止になる. It marks the agent of a passive for creations and discoveries, instead of に: この寺は足利義満によって建てられた. And in writing it gives a cause or means: 地震によって多くの家が壊れた (before a noun: 事故による遅れ). Don't confuse it with によると / によれば, which name a source of information and end in そうだ or らしい: ニュースによると、〜そうだ.",
+            examples: [("国によって、食事のマナーはずいぶん違います。", "Table manners differ a lot from country to country."), ("『源氏物語』は紫式部によって書かれた。", "The Tale of Genji was written by Murasaki Shikibu."), ("ニュースによると、台風による被害はかなり大きいそうだ。", "According to the news, the typhoon damage is quite serious.")],
+            keywords: ["によって", "によると", "による", "depending on"],
+            pick("同じ料理でも、作る人＿＿味がかなり変わる。", "Even the same dish can taste quite different depending on who makes it.", "によって", "によると", "にとって", "として"),
+            pick("A：今日の試合、やるのかな。\nB：さっきのニュース＿＿、雨で中止になったらしいよ。", "A: I wonder if today's game is still on. B: According to the news just now, it's been called off because of rain.", "によると", "によって", "によっては", "について"),
+            pick("電話は1876年にベル＿＿発明された。", "The telephone was invented by Bell in 1876.", "によって", "によると", "に対して", "にとって"),
+            pick("この薬は、人＿＿眠くなることがあるので、運転の前には飲まないでください。", "This medicine can make some people sleepy, so please don't take it before driving.", "によっては", "によると", "にとっては", "としては"),
+            build("Many trains stopped because of the heavy snow that kept falling since last night.", "昨夜から/tm 降り続いた/d 大雪/c によって、/c 多くの/d 電車が/s 止まって/v しまった。/v", extra: "によると、"),
+            build("The train delay caused by the accident lasted about two hours.", "事故/d による/d 電車の/d 遅れは、/t 二時間/d ほど/d 続いた。/v", extra: "によって", "によると"),
+            say("The way people think about marriage is completely different depending on the generation.", "結婚についての考え方は、世代によって全然違います", "結婚に対する考え方は世代によってまったく違う", "結婚についての考え方は世代によって全く違います"),
+            say("According to the weather forecast, a typhoon is going to hit Tokyo tomorrow.", "天気予報によると、明日台風が東京に来るそうです", "天気予報によると、明日は台風が東京に来るらしい", "天気予報によれば、明日台風が東京に上陸するそうです")
+        ),
+        lesson(
+            "n3.3.4", "〜として", "as (in the role of)",
+            form: "Noun + として (as); Noun + としては (speaking as / for my part); Noun + としての + Noun",
+            note: "として gives the role, position or capacity someone acts in: 通訳として働く, 留学生として来日した. Before a noun it becomes としての: 親としての責任. 私としては means \"speaking for myself / personally\" and introduces an opinion. Don't mix it up with にとって: にとって is the viewpoint an evaluation is made from (私にとって大切だ), while として is the role (親として心配する). The classic slip is 私にとっては〜と思う where 私としては is meant.",
+            examples: [("姉は看護師として、大学病院で働いています。", "My older sister works as a nurse at a university hospital."), ("私としては、この計画にはあまり賛成できません。", "Personally, I can't really agree with this plan."), ("親としての責任を忘れてはいけない。", "You mustn't forget your responsibility as a parent.")],
+            keywords: ["として", "としては", "as a", "in the role of"],
+            pick("彼は留学生＿＿日本に来て、そのまま日本の会社に就職した。", "He came to Japan as an exchange student and then went straight into a job at a Japanese company.", "として", "にとって", "によって", "について"),
+            pick("この指輪は祖母の形見なので、私＿＿お金では買えない宝物です。", "This ring was my grandmother's, so to me it's a treasure money can't buy.", "にとって", "として", "としては", "に対して"),
+            pick("A：来年から大阪支社に行くことになったんだ。\nB：そうなんだ。リーダー＿＿行くの？", "A: I'm being transferred to the Osaka branch from next year. B: Oh really? Are you going there as the team leader?", "として", "にとって", "について", "としての"),
+            pick("A：この案、どう思う？\nB：うーん、私＿＿、もう少し時間をかけて考えたほうがいいと思うけど。", "A: What do you think of this proposal? B: Hmm, personally, I think we should take a bit more time over it.", "としては", "にとっては", "に対しては", "としての"),
+            build("As a parent, I'm worried about my son going to study abroad alone.", "親/t として、/t 一人で/d 留学する/d 息子/o のことが/o 心配です。/v", extra: "にとって、"),
+            build("The building that used to be a school is now used as an art museum.", "昔は/tm 学校だった/d 建物が、/s 今は/tm 美術館/d として/d 使われている。/v", extra: "にとって", "使っている。"),
+            say("My older sister works as an English teacher at a high school in Osaka.", "姉は大阪の高校で英語の先生として働いています", "姉は英語の教師として大阪の高校で働いています", "姉は大阪の高校で英語の先生として働いている"),
+            say("Speaking for myself, I think it would be better to hold the party next month.", "私としては、パーティーは来月にしたほうがいいと思います", "私としては、パーティーを来月にしたほうがいいと思う", "僕としては、パーティーは来月のほうがいいと思います")
+        ),
+        lesson(
+            "n3.3.5", "〜さえ", "even / (さえ〜ば) as long as",
+            form: "Noun + さえ (replaces が・を; follows に・で・と: にさえ); person as subject: Noun + でさえ; Noun + さえ + 〜ば; Verb stem + さえすれば; い-adj く / な-adj で + さえあれば",
+            note: "さえ means \"even\": it picks an extreme example so everything else is implied: 水さえ飲めなかった (I couldn't even drink water). With a person as subject it's usually でさえ: 先生でさえ分からない. It replaces が and を (水をさえ is wrong) but stays after other particles: 子供にさえ分かる. With ば it flips to \"as long as / if only\": お金さえあれば, 薬を飲みさえすれば治る, 体が丈夫でさえあれば. It's stronger and more emotional than も; in writing すら is a close synonym.",
+            examples: [("忙しくて、昼ご飯を食べる時間さえなかった。", "I was so busy I didn't even have time to eat lunch."), ("このくらいの問題なら、小学生でさえ解けますよ。", "Even an elementary school kid could solve a problem like this."), ("道さえ分かれば、一人で行けます。", "As long as I know the way, I can go by myself.")],
+            keywords: ["さえ", "でさえ", "さえ〜ば", "even", "as long as"],
+            pick("引っ越したばかりで、近所のコンビニの場所＿＿まだ分からない。", "I've only just moved, so I don't even know where the nearest convenience store is yet.", "さえ", "さえを", "だけ", "しか"),
+            pick("この漢字は難しすぎて、日本人＿＿読めないことがある。", "This kanji is so hard that sometimes even Japanese people can't read it.", "でさえ", "さえで", "しか", "だけで"),
+            pick("A：試験、大丈夫かな…。\nB：大丈夫だよ。教科書の例文を＿＿すれば、合格できるって。", "A: I wonder if I'll be OK on the exam... B: You'll be fine. As long as you memorize the example sentences in the textbook, you'll pass.", "覚えさえ", "覚えてさえ", "覚えるさえ", "覚えたさえ"),
+            pick("体が＿＿あれば、どんな仕事でもできる。", "As long as you're healthy, you can do any kind of work.", "丈夫でさえ", "丈夫さえ", "丈夫にさえ", "丈夫なさえ"),
+            build("I was so tired yesterday that I didn't even have the energy to take a bath.", "昨日は/tm 疲れていて、/c お風呂に/g 入る/d 元気/s さえ/s なかった。/v", extra: "しか"),
+            build("As long as you have a passport, you can go to most countries in Asia.", "パスポート/s さえ/s あれば、/c アジアの/d ほとんどの/d 国に/g 行けます。/v", extra: "なければ、"),
+            say("Even my mother, who loves cooking, said this recipe was difficult.", "料理が大好きな母でさえ、このレシピは難しいと言っていました", "料理が大好きな母でさえ、このレシピは難しいと言った", "料理が好きな母でさえこのレシピは難しいと言っていた"),
+            say("If only I'd had a little more time, I could have finished the report.", "もう少し時間さえあれば、レポートを終わらせられたのに", "もう少し時間さえあったら、レポートを書き終えられたのに", "もう少し時間さえあれば、レポートを書き終えることができたのに")
+        ),
+        lesson(
+            "n3.3.6", "〜くせに", "even though (critical)",
+            form: "Plain form + くせに (な-adj + な + くせに; Noun + の + くせに)",
+            note: "くせに means \"even though\" with blame or contempt: the speaker thinks the person should know or act better. 知っているくせに教えてくれない (He knows, yet he won't tell me). のに expresses the same contrast more neutrally, often with disappointment, and can be about yourself or a situation; くせに is about another person and is always a complaint, so don't use it about yourself or the weather, or to a superior's face. In casual speech you'll also hear くせして, or a sentence that just ends in くせに！",
+            examples: [("弟は自分では何もしないくせに、文句ばかり言う。", "My little brother never does anything himself, but he complains about everything."), ("子供のくせに、生意気なことを言うな。", "Don't be cheeky — you're just a kid."), ("本当は寂しいくせに、平気なふりをしている。", "She's actually lonely, but she's pretending she's fine.")],
+            keywords: ["くせに", "のに", "even though", "criticism"],
+            pick("兄は自分はよく約束を破る＿＿、私が少し遅れるとすごく怒る。", "My brother is always breaking promises himself, yet he gets really angry when I'm even a little late.", "くせに", "くせで", "ために", "ばかりに"),
+            pick("一生懸命勉強した＿＿、試験に落ちてしまった。", "Even though I studied really hard, I failed the exam.", "のに", "くせに", "ので", "ために"),
+            pick("彼は大学生＿＿、こんな簡単な漢字も書けないの？", "He's a university student and he can't even write a simple kanji like this?", "のくせに", "なくせに", "くせに", "だくせに"),
+            pick("A：佐藤さん、またパーティーに来なかったね。\nB：そうなの。自分で「絶対行く」って言った＿＿ね。", "A: Sato didn't show up to the party again. B: I know. And after he said himself he'd definitely come.", "くせに", "くせで", "ばかりに", "ことに"),
+            build("It's unfair to pretend you don't know when you actually know the answer.", "答えを/o 知っている/v くせに、/c 知らない/d ふりを/o する/v なんて/t ずるい。/v", extra: "くせで", "知った"),
+            build("My older sister doesn't clean her own room, yet she tells me to clean mine.", "姉は/t 自分の/d 部屋を/o 掃除しない/v くせに、/c 私には/g 掃除しろと/d 言う。/v", extra: "掃除する"),
+            say("He's only a beginner, yet he talks as if he knows everything.", "初心者のくせに、何でも知っているような話し方をする", "彼は初心者のくせに、何でも知っているように話す", "初心者のくせに、何でも知っているみたいに話す"),
+            say("You can't even cook yourself, and you're complaining about my cooking?", "自分は料理もできないくせに、私の料理に文句を言うの", "料理もできないくせに、私の料理に文句言うの", "自分は料理できないくせに、僕の料理に文句を言うの")
+        ),
+    ], level: "N3")
+
+    // MARK: - Unit 17
+
+    static let unit17 = CourseUnit(id: 17, title: "Natural-sounding endings", summary: "っぽい, ずに, わけにはいかない, ことはない, ものだ, っけ", lessons: [
+        lesson(
+            "n3.4.1", "〜っぽい", "-ish / tends to",
+            form: "Noun / Verb stem / い-adj stem + っぽい (conjugates like an い-adj: っぽくない, っぽかった, っぽく)",
+            note: "っぽい has three uses: \"-ish / looks like\" with colors and nouns (白っぽい, 大人っぽい), \"has the character of\", usually negative (子供っぽい, 安っぽい), and \"tends to\" with verb stems (忘れっぽい, 怒りっぽい). Compare らしい, \"a typical, proper X\" in a good sense (男らしい = manly), and みたい / よう, \"looks like\" without the character judgement. The classic mistake is attaching it to the dictionary form: 忘れるっぽい → 忘れっぽい. In casual speech っぽい also follows a noun or sentence to mean \"seems like\": 明日は雨っぽいね.",
+            examples: [("母は最近忘れっぽくなって、同じ話を何度もする。", "My mother has gotten forgetful lately and tells the same story over and over."), ("彼女は年の割に大人っぽい服を着ている。", "She wears clothes that look mature for her age."), ("その白っぽいシャツ、どこで買ったの？", "Where did you buy that whitish shirt?")],
+            keywords: ["っぽい", "-ish", "子供っぽい", "忘れっぽい"],
+            pick("父は年を取ってから＿＿なって、すぐ大きな声を出すようになった。", "Since getting older, my father has become short-tempered and raises his voice at the slightest thing.", "怒りっぽく", "怒るっぽく", "怒りっぽい", "怒りっぽいに"),
+            pick("彼はもう三十歳なのに、考え方がまだ＿＿。", "He's already thirty, but the way he thinks is still childish.", "子供っぽい", "子供らしい", "子供みたいな", "子供っぽく"),
+            pick("A：空が暗くなってきたね。\nB：うん、夕方から雨＿＿ね。傘持っていこう。", "A: The sky's getting dark. B: Yeah, looks like rain from the evening. Let's take umbrellas.", "っぽい", "っぽく", "そう", "ような"),
+            pick("＿＿コートを着た人が、さっきから店の前に立っている。", "Someone in a blackish coat has been standing in front of the shop for a while.", "黒っぽい", "黒いっぽい", "黒っぽく", "黒らしい"),
+            build("My grandmother has gotten forgetful, so she makes a point of writing important things in a memo.", "祖母は/t 忘れっぽく/d なった/v ので、/c 大事な/d ことは/o メモに/g 書く/v ようにしている。/e", extra: "忘れるっぽく"),
+            build("That shirt looks cheap, so you'd better not wear it to the interview.", "そのシャツは/t 安っぽく/d 見える/v から、/c 面接には/g 着ていかない/v ほうが/e いい。/e", extra: "安いっぽく"),
+            say("My younger brother is already twenty, but he still acts childish.", "弟はもう二十歳なのに、まだ子供っぽい", "弟はもう二十歳なのに、まだ子供っぽいことをする", "弟はもう20歳だけど、まだ子供っぽいです"),
+            say("Since she cut her hair, she looks more grown-up than before.", "髪を切ってから、彼女は前より大人っぽく見える", "彼女は髪を切ってから、前より大人っぽくなった", "髪を切ってから、彼女は前より大人っぽく見えます")
+        ),
+        lesson(
+            "n3.4.2", "〜ずに", "without doing",
+            form: "ない-form minus ない + ずに (する → せずに; 来る → 来ずに (こずに))",
+            note: "ずに means \"without doing\" and is the more written, slightly formal version of ないで: 朝ご飯を食べずに出かけた = 食べないで出かけた. Watch the irregulars: する → せずに (not しずに), 来る → こずに. ずに only means \"without\": it can't make a request like 行かないで (please don't go), and it isn't the usual way to give a reason like なくて (分からなくて困った). In writing you also see ず on its own as a connector: 何も言わず、帰った.",
+            examples: [("昨日は疲れていて、シャワーも浴びずに寝てしまった。", "I was tired yesterday and fell asleep without even taking a shower."), ("辞書を使わずに、この記事が読めるようになりたい。", "I want to be able to read this article without using a dictionary."), ("彼は誰にも相談せずに、会社を辞めた。", "He quit the company without consulting anyone.")],
+            keywords: ["ずに", "せずに", "without doing", "ないで"],
+            pick("部長に何も＿＿、勝手に会議の時間を変えてはいけない。", "You mustn't change the meeting time on your own without saying anything to the manager.", "言わずに", "言いずに", "言わないずに", "言わなくて"),
+            pick("彼は全然＿＿試験を受けたのに、八十点も取った。", "He took the exam without studying at all, and still got as much as 80 points.", "勉強せずに", "勉強しずに", "勉強さずに", "勉強しなくて"),
+            pick("A：もう帰るの？\nB：うん、明日早いから。\nA：そう…。まだ＿＿よ。もう少し話そう。", "A: Are you leaving already? B: Yeah, I have an early start tomorrow. A: Oh... Don't go yet. Let's talk a bit longer.", "帰らないで", "帰らずに", "帰らなくて", "帰らず"),
+            pick("田中さんは昨日の練習に＿＿、家でずっとゲームをしていたらしい。", "Apparently Tanaka skipped yesterday's practice and played games at home all day instead.", "こずに", "きずに", "くずに", "こないずに"),
+            build("I overslept, so I rushed out of the house without eating breakfast.", "寝坊した/v ので、/c 朝ご飯/o を/o 食べずに/v 家を/o 飛び出した。/v", extra: "食べないずに", "食べずで"),
+            build("He quit the company without consulting anyone in his family.", "彼は/t 家族の/d 誰にも/g 相談せずに、/v 会社を/o 辞めて/v しまった。/v", extra: "相談しずに、"),
+            say("I want to be able to read Japanese novels without using a dictionary.", "辞書を使わずに日本語の小説が読めるようになりたい", "辞書を使わずに、日本語の小説を読めるようになりたいです", "辞書を使わないで日本語の小説が読めるようになりたい"),
+            say("She went to bed without doing her homework, so the teacher scolded her the next day.", "宿題をせずに寝たので、次の日先生に叱られた", "彼女は宿題をせずに寝たので、次の日先生に怒られました", "彼女は宿題をしないで寝たので、次の日先生に叱られた")
+        ),
+        lesson(
+            "n3.4.3", "〜わけにはいかない", "can't (for social or moral reasons)",
+            form: "Dictionary form + わけにはいかない (can't); ない-form + わけにはいかない (have to)",
+            note: "わけにはいかない says you can't do something because of circumstances, duty or what people would think, not because you're unable: 明日は試験だから、遊びに行くわけにはいかない. The double negative ないわけにはいかない means \"can't not\", so \"have to\" out of obligation: 招待されたから、行かないわけにはいかない. For plain inability use the potential (行けない, 持てない). Don't confuse it with わけがない (\"there's no way\") or わけではない (\"it's not that...\"). Polite: わけにはいきません; casual speech often drops は: わけにいかない.",
+            examples: [("大事な会議があるので、熱があっても休むわけにはいかない。", "I have an important meeting, so I can't take the day off even with a fever."), ("先輩に頼まれたら、手伝わないわけにはいかない。", "If a senior colleague asks me, I can't not help."), ("車で来たから、お酒を飲むわけにはいかないんです。", "I drove here, so I really can't drink.")],
+            keywords: ["わけにはいかない", "ないわけにはいかない", "can't", "have to"],
+            pick("A：もう一杯どう？\nB：ありがとう。でも今日は車で来たから、＿＿んだ。", "A: How about another drink? B: Thanks. But I drove here today, so I really can't.", "飲むわけにはいかない", "飲めるわけにはいかない", "飲んだわけにはいかない", "飲むわけがない"),
+            pick("お世話になった先生の結婚式だから、どんなに忙しくても＿＿。", "It's the wedding of a teacher who did so much for me, so however busy I am, I have to go.", "行かないわけにはいかない", "行くわけにはいかない", "行かないわけではない", "行けないわけにはいかない"),
+            pick("このかばんは重すぎて、私一人では＿＿。", "This bag is too heavy for me to carry by myself.", "持てない", "持つわけにはいかない", "持たないわけにはいかない", "持つわけがない"),
+            pick("社長が自ら頭を下げて謝っているのに、部下の私たちが＿＿。", "The president himself is bowing and apologizing, so we, his staff, can't just stay silent.", "黙っているわけにはいかない", "黙っていないわけにはいかない", "黙っているわけではない", "黙っているわけがない"),
+            build("Everyone is waiting for me, so I can't give up halfway.", "みんなが/s 待っている/v から、/c 途中で/tm あきらめる/v わけには/e いかない。/e", extra: "わけでは", "あきらめない"),
+            build("It's a job I agreed to take on, so I have to see it through to the end.", "一度/tm 引き受けた/d 仕事だ/v から、/c 最後まで/tm やらない/v わけには/e いかない。/e", extra: "やる", "わけでは"),
+            say("I have an important exam tomorrow, so I can't stay up late playing games tonight.", "明日は大事な試験だから、今夜は遅くまでゲームをするわけにはいかない", "明日は大切な試験なので、今晩は遅くまでゲームをするわけにはいきません", "明日大事な試験があるから、今夜遅くまでゲームをするわけにはいかない"),
+            say("My boss asked me directly, so I can't really turn it down.", "上司に直接頼まれたから、断るわけにはいかない", "上司に直接頼まれたので、断るわけにはいきません", "部長に直接頼まれたから、断るわけにはいかない")
+        ),
+        lesson(
+            "n3.4.4", "〜ことはない", "there's no need to",
+            form: "Dictionary form + ことはない",
+            note: "ことはない tells someone there's no need to do something, often as reassurance: 心配することはないよ (There's nothing to worry about). It's warmer and more personal than 必要はない; 〜なくてもいい is the neutral \"don't have to\". Don't confuse it with た-form + ことがない, \"have never done\": 行ったことがない = I've never been. Dictionary form + は = no need; た-form + が = never. In casual speech は often drops: 謝ることないよ.",
+            examples: [("大した怪我じゃないから、そんなに心配することはないよ。", "It's not a serious injury, so there's no need to worry so much."), ("電話で済む話なら、わざわざ会いに行くことはない。", "If it can be sorted out on the phone, there's no need to go all the way to see them."), ("一回失敗したからって、そんなに落ち込むことはないよ。", "Just because you failed once, there's no need to get so down.")],
+            keywords: ["ことはない", "no need to", "ことがない", "必要はない"],
+            pick("A：明日のプレゼン、緊張するなあ。\nB：あんなに練習したんだから、＿＿よ。", "A: I'm so nervous about tomorrow's presentation. B: You've practiced so much, there's no need to be nervous.", "緊張することはない", "緊張したことはない", "緊張することがない", "緊張しないことはない"),
+            pick("富士山には一度も＿＿ので、今年の夏はぜひ登りたい。", "I've never once climbed Mt. Fuji, so I really want to this summer.", "登ったことがない", "登ることはない", "登ることがない", "登らないことはない"),
+            pick("急ぎの仕事じゃないから、今日中に＿＿。明日でいいよ。", "It isn't urgent, so there's no need to finish it today. Tomorrow's fine.", "終わらせることはない", "終わらせたことはない", "終わらせないことはない", "終わらせることがない"),
+            pick("たった一回失敗しただけなんだから、そんなに＿＿ことはないよ。", "You only failed once, so there's no need to get so down about it.", "落ち込む", "落ち込んだ", "落ち込まない", "落ち込んで"),
+            build("It's just an easy quiz, so there's no need to stay up all night studying.", "簡単な/d 小テストだ/v から、/c 徹夜して/d 勉強する/v ことは/e ないよ。/e", extra: "ことが", "した"),
+            build("If it can be settled by email, there's no need to go all the way to the office.", "メールで/d 済む/v なら、/c わざわざ/d 会社まで行く/v ことは/e ない。/e", extra: "ことが", "行った"),
+            say("It isn't your fault, so there's no need to apologize.", "あなたのせいじゃないから、謝ることはないよ", "君のせいじゃないから、謝ることはない", "あなたのせいではないので、謝ることはありません"),
+            say("I've lived in Tokyo for ten years, but I've never been to Tokyo Tower.", "東京に十年住んでいるけど、東京タワーに行ったことがない", "東京に十年住んでいますが、東京タワーには行ったことがありません", "東京に10年住んでいるのに、東京タワーに行ったことがない")
+        ),
+        lesson(
+            "n3.4.5", "〜ものだ", "that's how it is / used to / should",
+            form: "Dictionary form + ものだ (how things are / should be); た-form + ものだ (used to); Dictionary form + ものではない (shouldn't); い-adj / な-adj + な + ものだ (feeling)",
+            note: "ものだ states how things naturally are or ought to be: 人は年を取ると、昔の話をしたくなるものだ. With the た-form it's nostalgic \"used to\": 子供の頃、よくこの川で泳いだものだ. ものではない is social advice, \"one shouldn't\": 人の悪口を言うものではない. It also voices a feeling: 時間が経つのは早いものだ. Compare ことだ, which is direct advice to one person about their situation (早く寝ることだ), and はずだ, a logical expectation. Casual: もんだ / もんじゃない.",
+            examples: [("子供の頃は、暗くなるまで友達と外で遊んだものだ。", "When I was a kid, I used to play outside with friends until it got dark."), ("目上の人には敬語を使うものだ。", "You're supposed to use polite language with people above you."), ("時間が経つのは本当に早いものですね。", "Time really does fly, doesn't it?")],
+            keywords: ["ものだ", "たものだ", "ものではない", "used to", "should"],
+            pick("学生の頃はお金がなくて、毎日インスタントラーメンを＿＿ものだ。", "When I was a student I had no money, and I'd eat instant ramen every day.", "食べた", "食べる", "食べている", "食べない"),
+            pick("人の手紙を勝手に＿＿。", "You shouldn't read other people's letters without permission.", "読むものではない", "読んだものではない", "読むことではない", "読むものではなかった"),
+            pick("A：最近、なかなか寝られないんです。\nB：それなら、寝る前にスマホを見ない＿＿よ。", "A: I haven't been able to sleep lately. B: In that case, the best thing for you is to not look at your phone before bed.", "ことです", "ものです", "はずです", "わけです"),
+            pick("A：もう卒業して十年か。\nB：本当に、時間が経つのは＿＿ね。", "A: It's already been ten years since we graduated. B: Time really does fly, doesn't it.", "早いものです", "早かったものです", "早いことです", "早くものです"),
+            build("When I was a kid, I'd often hide in the closet whenever my mother scolded me.", "子供の/tm 頃は、/tm 母に/s 怒られる/v と、/c よく/d 押し入れに隠れた/v ものだ。/e", extra: "隠れる", "ことだ。"),
+            build("You shouldn't say bad things about people when they're not around.", "人の/d 悪口は、/o 本人の/s いない/d 所で/p 言う/v ものでは/e ない。/e", extra: "言った", "ことでは"),
+            say("When I was in high school, I used to go to that café with my friends after school.", "高校生の頃、放課後に友達とよくあのカフェに行ったものだ", "高校の時は、放課後に友達とあのカフェによく行ったものです", "高校生の頃は、放課後友達とあの喫茶店に行ったものだ"),
+            say("You shouldn't talk loudly on the phone when you're on the train.", "電車の中で大きな声で電話するものではない", "電車の中で大きい声で電話するものではありません", "電車で大声で電話するもんじゃない")
+        ),
+        lesson(
+            "n3.4.6", "〜っけ", "trying to recall (…again?)",
+            form: "Plain past + っけ; Noun / な-adj + だっけ / だったっけ; Verb + んだっけ; polite: 〜ましたっけ / でしたっけ",
+            note: "っけ is what you add when you're trying to remember something you once knew, or checking it with the listener: 会議は何時だっけ？ (What time was the meeting again?). It's conversational and doesn't follow です / ます in the present: use でしたっけ / ましたっけ. It differs from か, a plain question about new information, and from よね, which seeks agreement on something you're fairly sure of. A dictionary-form verb needs んだ first: 行くっけ → 行くんだっけ. Said to yourself it can also be nostalgic: 昔はよくここで遊んだっけ.",
+            examples: [("あれ、今日の会議って何時からだっけ？", "Wait, what time does today's meeting start again?"), ("すみません、お名前は何でしたっけ。", "Sorry, what was your name again?"), ("鍵、どこに置いたっけ。", "Where did I put my keys?")],
+            keywords: ["っけ", "だっけ", "ましたっけ", "trying to remember"],
+            pick("A：あの映画、誰と見に行った＿＿？\nB：私とだよ。忘れたの？", "A: Who did I go see that movie with again? B: With me! Did you forget?", "っけ", "か", "よね", "の"),
+            pick("すみません、山田さんの電話番号、何番＿＿。", "Excuse me, what was Mr. Yamada's phone number again?", "でしたっけ", "ですっけ", "でしっけ", "ましたっけ"),
+            pick("あれ？ この話、前にも＿＿っけ？", "Huh? Did I already tell you this story before?", "話した", "話す", "話して", "話そう"),
+            pick("A：明日の授業、休みだ＿＿？確か先生がそう言ってたし。\nB：うん、休みだよ。", "A: Tomorrow's class is cancelled, isn't it? I'm pretty sure the teacher said so. B: Yeah, it is.", "よね", "っけ", "か", "って"),
+            build("What time did they say tomorrow's meeting starts again?", "明日の/d 会議って、/t 何時/tm から/tm 始まる/v んだ/e っけ？/e", extra: "か"),
+            build("Where did I put the room key I used yesterday?", "昨日/tm 使った/d 部屋の/d 鍵、/o どこに/p 置いた/v んだ/e っけ。/e", extra: "置く", "か"),
+            say("Sorry, I think you told me before, but what was your name again?", "すみません、前に聞いたと思うんですが、お名前は何でしたっけ", "すみません、前にも聞きましたが、お名前は何でしたっけ", "ごめん、前に聞いたと思うけど、名前何だっけ"),
+            say("Wait, was tomorrow's meeting at ten or at eleven? I can't remember.", "あれ、明日の会議は十時だっけ、十一時だっけ。思い出せない", "明日の会議って十時だったっけ、十一時だったっけ。覚えてない", "あれ、明日の会議は10時でしたっけ、11時でしたっけ。思い出せません")
+        ),
+    ], level: "N3")
+}

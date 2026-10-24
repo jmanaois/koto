@@ -26,7 +26,7 @@ struct DailyPlan {
         let grammar = (try? context.fetch(FetchDescriptor<SavedGrammar>())) ?? []
         let due = grammar
             .filter { $0.dueAt <= now }
-            .compactMap { card in N5Course.lesson(pattern: card.pattern).map { (lesson: $0, dueAt: card.dueAt) } }
+            .compactMap { card in Curriculum.lesson(pattern: card.pattern).map { (lesson: $0, dueAt: card.dueAt) } }
             .sorted { (isWeak($0.lesson) ? 0 : 1, $0.dueAt) < (isWeak($1.lesson) ? 0 : 1, $1.dueAt) }
             .map(\.lesson)
 
@@ -41,19 +41,19 @@ struct DailyPlan {
         plan.reviews = Array(due.prefix(maxReviews))
         if !studiedToday {
             plan.practice = Array(
-                N5Course.lessons.filter {
+                Curriculum.lessons.filter {
                     done.contains($0.id) && !learnedTodayIDs.contains($0.id) && !plan.reviews.contains($0) && isWeak($0)
                 }.prefix(2)
             )
         }
-        plan.new = Array(N5Course.lessons.filter { !done.contains($0.id) }.prefix(max(0, newPerDay - learnedToday)))
+        plan.new = Array(Curriculum.lessons.filter { !done.contains($0.id) }.prefix(max(0, newPerDay - learnedToday)))
         return plan
     }
 
     /// One more new lesson, after today's are done.
     static func extra(context: ModelContext) -> DailyPlan {
         let done = Set(((try? context.fetch(FetchDescriptor<LessonProgress>())) ?? []).map(\.lessonID))
-        return DailyPlan(new: Array(N5Course.lessons.filter { !done.contains($0.id) }.prefix(1)))
+        return DailyPlan(new: Array(Curriculum.lessons.filter { !done.contains($0.id) }.prefix(1)))
     }
 
     /// Grammar points こと corrected most, most frequent first.
@@ -73,6 +73,8 @@ final class LessonSession {
         case daily
         case lesson
         case placement(unit: Int)
+        /// Conjugation practice on random verbs; nothing is learned or rated.
+        case drill
     }
 
     struct Step: Identifiable {
@@ -166,6 +168,28 @@ final class LessonSession {
             .shuffled()
     }
 
+    /// `count` random verbs in random `forms`. With `chains`, some questions stack a derived form
+    /// (potential, passive…) with an ending: 呼ばれなかった.
+    init(drill forms: [VerbForm], chains: Bool, count: Int, context: ModelContext, service: ChatService) {
+        kind = .drill
+        self.context = context
+        self.service = service
+        let derived = forms.filter(\.isDerived)
+        var seen: Set<Exercise> = []
+        var steps: [Step] = []
+        while steps.count < count, !forms.isEmpty, seen.count < count * 3 {
+            var chain = [forms.randomElement()!]
+            if chains, !derived.isEmpty, Bool.random() {
+                chain = [derived.randomElement()!, VerbForm.endings.randomElement()!]
+            }
+            guard let verb = Verb.pool.filter({ verb in chain.allSatisfy(verb.drills) }).randomElement() else { continue }
+            let exercise = Exercise.conjugate(verb: verb, forms: chain)
+            guard seen.insert(exercise).inserted else { continue }
+            steps.append(Step(lesson: ConjugationCourse.lesson(drilling: chain), exercise: exercise, purpose: .practice))
+        }
+        queue = steps
+    }
+
     private static func steps(learning lesson: CourseLesson, purpose: Step.Purpose) -> [Step] {
         [Step(lesson: lesson, exercise: nil, purpose: purpose)]
             + lesson.exercises.map { Step(lesson: lesson, exercise: $0, purpose: purpose) }
@@ -182,6 +206,10 @@ final class LessonSession {
         case (.build(_, let chunks, _), .tiles(let tiles)):
             let given = tiles.joined()
             finishCheck(Feedback(verdict: given == chunks.map(\.text).joined() ? .right : .wrong, given: given))
+        case (.conjugate(let verb, let forms), .typed(let text)):
+            let given = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            let isRight = Conjugator.matches(given, Conjugator.conjugate(verb, forms))
+            finishCheck(Feedback(verdict: isRight ? .right : .wrong, given: given, note: Conjugator.rule(verb, forms)))
         case (.translate(let english, let answers), .typed(let text)):
             let given = text.trimmingCharacters(in: .whitespacesAndNewlines)
             let typed = Exercise.comparable(given)
@@ -281,7 +309,7 @@ final class LessonSession {
 
     private func finish() {
         isFinished = true
-        if case .placement(let unitID) = kind, let unit = N5Course.units.first(where: { $0.id == unitID }) {
+        if case .placement(let unitID) = kind, let unit = Curriculum.units.first(where: { $0.id == unitID }) {
             let done = Set(((try? context.fetch(FetchDescriptor<LessonProgress>())) ?? []).map(\.lessonID))
             for lesson in unit.lessons where !done.contains(lesson.id) {
                 if mistakes[lesson.id, default: 0] == 0 {

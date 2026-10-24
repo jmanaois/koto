@@ -6,6 +6,8 @@ nonisolated struct CourseUnit: Identifiable {
     let title: String
     let summary: String
     let lessons: [CourseLesson]
+    /// JLPT level, shown in the unit header.
+    var level = "N5"
 }
 
 /// One grammar point: an explainer card, then exercises. Finishing it adds the point to the grammar deck.
@@ -35,6 +37,8 @@ nonisolated enum Exercise: Hashable {
     case build(english: String, chunks: [MessageExplanation.Chunk], extras: [String])
     /// Type the Japanese for an English sentence. Any of `answers` is right; anything else is checked by Claude.
     case translate(english: String, answers: [String])
+    /// Type `verb` in `forms`, applied in order: [.passive, .past] → 食べられた. Checked on the device.
+    case conjugate(verb: Verb, forms: [VerbForm])
 
     static let blank = "＿＿"
     /// A choice option meaning "no particle here".
@@ -43,6 +47,7 @@ nonisolated enum Exercise: Hashable {
     var english: String {
         switch self {
         case .choice(_, let english, _), .build(let english, _, _), .translate(let english, _): english
+        case .conjugate(let verb, let forms): "\(verb.kanji) (\(verb.english)) → \(forms.map(\.shortLabel).joined(separator: " + "))"
         }
     }
 
@@ -55,6 +60,8 @@ nonisolated enum Exercise: Hashable {
             chunks.map(\.text).joined()
         case .translate(_, let answers):
             answers[0]
+        case .conjugate(let verb, let forms):
+            Conjugator.conjugate(verb, forms).kanji
         }
     }
 
@@ -72,10 +79,18 @@ nonisolated enum Exercise: Hashable {
         return merged
     }
 
-    /// Choice and build exercises are checked on the device, so they work offline.
+    /// Everything but translations is checked on the device, so it works offline.
     var isOffline: Bool {
         if case .translate = self { return false }
         return true
+    }
+
+    /// Answered by typing rather than tapping.
+    var isTyped: Bool {
+        switch self {
+        case .translate, .conjugate: true
+        case .choice, .build: false
+        }
     }
 
     /// Text compared when checking a typed answer: kana readings, hiragana, no punctuation or spaces.
@@ -91,8 +106,12 @@ nonisolated enum Exercise: Hashable {
     }
 }
 
-extension N5Course {
-    static var lessons: [CourseLesson] { units.flatMap(\.lessons) }
+/// Every unit, in the order they're taught: N5 grammar, verb conjugation, then N4 and N3.
+/// Unit ids are used for placement checks, so they're unique across levels.
+nonisolated enum Curriculum {
+    static let units: [CourseUnit] = N5Course.units + ConjugationCourse.units + N4Course.units + N3Course.units
+
+    static let lessons: [CourseLesson] = units.flatMap(\.lessons)
 
     static func lesson(id: String) -> CourseLesson? {
         lessons.first { $0.id == id }
@@ -110,11 +129,22 @@ extension N5Course {
 // MARK: - Writing lessons
 
 /// Short helpers so the course content reads like a list.
-nonisolated extension N5Course {
+nonisolated protocol CourseWriting {}
+
+nonisolated extension CourseWriting {
     static func lesson(
         _ id: String, _ pattern: String, _ meaning: String,
         form: String, note: String, examples: [(String, String)], keywords: [String] = [],
         _ exercises: Exercise...
+    ) -> CourseLesson {
+        lesson(id, pattern, meaning, form: form, note: note, examples: examples, keywords: keywords, exercises: exercises)
+    }
+
+    /// Same as above, for exercises built as a list (drills plus a few sentences).
+    static func lesson(
+        _ id: String, _ pattern: String, _ meaning: String,
+        form: String, note: String, examples: [(String, String)], keywords: [String] = [],
+        exercises: [Exercise]
     ) -> CourseLesson {
         CourseLesson(
             id: id,
@@ -150,5 +180,15 @@ nonisolated extension N5Course {
 
     static func say(_ english: String, _ answers: String...) -> Exercise {
         .translate(english: english, answers: answers)
+    }
+
+    /// Conjugate each verb (by its kanji in `Verb.pool`) into `forms`.
+    static func drill(_ forms: VerbForm..., verbs: String...) -> [Exercise] {
+        verbs.map { .conjugate(verb: Verb.named($0), forms: forms) }
+    }
+
+    /// Conjugate one verb through a chain of forms: conj("飲む", .causative, .past) → 飲ませた.
+    static func conj(_ verb: String, _ forms: VerbForm...) -> Exercise {
+        .conjugate(verb: Verb.named(verb), forms: forms)
     }
 }

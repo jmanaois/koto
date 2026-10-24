@@ -14,7 +14,7 @@ struct CourseView: View {
     @State private var session: LessonSession?
 
     private var done: Set<String> { Set(progress.map(\.lessonID)) }
-    private var nextLesson: CourseLesson? { N5Course.lessons.first { !done.contains($0.id) } }
+    private var nextLesson: CourseLesson? { Curriculum.lessons.first { !done.contains($0.id) } }
 
     var body: some View {
         NavigationStack {
@@ -33,7 +33,28 @@ struct CourseView: View {
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
 
-                ForEach(N5Course.units) { unit in
+                Section {
+                    NavigationLink {
+                        ConjugationDrillSetup { forms, chains, count in
+                            session = LessonSession(drill: forms, chains: chains, count: count, context: context, service: service)
+                        }
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Conjugation drill")
+                                    .font(.headline)
+                                Text("Type verb forms on random verbs, from ない to causative-passive")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "bolt.fill")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                }
+
+                ForEach(Curriculum.units) { unit in
                     unitSection(unit)
                 }
             }
@@ -67,7 +88,7 @@ struct CourseView: View {
             }
         } header: {
             HStack {
-                Text("Unit \(unit.id) · \(unit.title)")
+                Text("\(unit.level) · Unit \(unit.id) · \(unit.title)")
                 Spacer()
                 Text("\(finished)/\(unit.lessons.count)")
                     .monospacedDigit()
@@ -79,6 +100,68 @@ struct CourseView: View {
 }
 
 extension LessonSession: Identifiable {}
+
+/// Picks the forms, chaining and length for a conjugation drill.
+private struct ConjugationDrillSetup: View {
+    let onStart: ([VerbForm], Bool, Int) -> Void
+
+    @AppStorage("drillForms") private var storedForms = "negative,past,te,potential,volitional"
+    @AppStorage("drillChains") private var chains = false
+    @AppStorage("drillCount") private var count = 20
+
+    private var forms: [VerbForm] {
+        let names = Set(storedForms.split(separator: ",").map(String.init))
+        return VerbForm.allCases.filter { names.contains($0.rawValue) }
+    }
+
+    private func binding(_ form: VerbForm) -> Binding<Bool> {
+        Binding {
+            forms.contains(form)
+        } set: { isOn in
+            let updated = VerbForm.allCases.filter { $0 == form ? isOn : forms.contains($0) }
+            storedForms = updated.map(\.rawValue).joined(separator: ",")
+        }
+    }
+
+    var body: some View {
+        Form {
+            Section("Basic forms") {
+                ForEach(VerbForm.basics) { form in
+                    Toggle(form.label, isOn: binding(form))
+                }
+            }
+            Section("N4 forms") {
+                ForEach(VerbForm.advanced) { form in
+                    Toggle(form.label, isOn: binding(form))
+                }
+            }
+            Section {
+                Toggle("Chain forms", isOn: $chains)
+                    .disabled(!forms.contains(where: \.isDerived))
+                Stepper("\(count) questions", value: $count, in: 10...50, step: 5)
+                    .monospacedDigit()
+            } footer: {
+                Text("Chaining stacks a potential, passive or causative form with an ending, like 呼ばれなかった or 休ませて.")
+            }
+        }
+        .navigationTitle("Conjugation drill")
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                onStart(forms, chains, count)
+            } label: {
+                Text("Start drill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(forms.isEmpty)
+            .padding()
+            .background(.bar)
+        }
+    }
+}
 
 /// Streak, what today's lesson holds, and the button to start it.
 private struct TodayCard: View {
@@ -110,7 +193,7 @@ private struct TodayCard: View {
                         .foregroundStyle(streak > 0 && doneToday ? .orange : .secondary)
                 }
                 Spacer()
-                Text("\(lessonsDone)/\(N5Course.lessons.count) lessons")
+                Text("\(lessonsDone)/\(Curriculum.lessons.count) lessons")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
